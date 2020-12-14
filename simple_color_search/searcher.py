@@ -14,15 +14,15 @@ class Searcher:
         with open(self.indexPath) as indexFile:
             reader = csv.reader(indexFile)
 
-        # Loop over the rows in the indexFile
-        for row in reader:
-            # Calculating chi-square distance between features in index 
-            # and features in querry image
-            features = [float(x) for x in row[1:]]
-            distance = self.chi2_distance(features, queryFeatures)
+            # Loop over the rows in the indexFile
+            for row in reader:
+                # Calculating chi-square distance between features in index 
+                # and features in querry image
+                features = [float(x) for x in row[1:]]
+                distance = self.chi2_distance(features, queryFeatures)
 
-            # They key is the image ID
-            results[row[0]] = distance
+                # They key is the image ID
+                results[row[0]] = distance
 
         indexFile.close()
 

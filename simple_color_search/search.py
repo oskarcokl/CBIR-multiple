@@ -22,7 +22,7 @@ query = cv2.imread(args["query"])
 features = cd.describe(query)
 
 # Perform the search
-searcher = Searcher(args["idnex"])
+searcher = Searcher(args["index"])
 results = searcher.search(features)
 
 # Display the query
