@@ -23,14 +23,14 @@ class ColorDescriptor:
         # Eliptical mask for the center of the screen
         (axesX, axesY) = (int(width *0.75) // 2, int(height * 0.75) // 2)        
         # Mask is just a black image (that's why we use the zeros)
-        ellipsMask = np.zeros(image.shape[:2], dtype="unit8")
+        ellipsMask = np.zeros(image.shape[:2], dtype="uint8")
         cv2.ellipse(ellipsMask, (centerX, centerY), (axesX, axesY), 0, 0, 360, 255, -1)
 
         # Loop over segments
         for (startX, endX, startY, endY) in segments:
             # Construct mask for each corner by subracting elipse
             # from the square
-            cornerMask = np.zeros(image.shape[:2], dtype="unit8")
+            cornerMask = np.zeros(image.shape[:2], dtype="uint8")
             cv2.rectangle(cornerMask, (startX, startY), (endX, endY), 255, -1)
             cornerMask = cv2.subtract(cornerMask, ellipsMask)
 
@@ -46,7 +46,7 @@ class ColorDescriptor:
 
     def histogram(self, image, mask):
         # Extract a 3D color histogram from mask region of the image
-        hist = cv2.calcHist([image], [0, 1, 2], self.bins, [0, 180, 0, 256, 0, 256])
+        hist = cv2.calcHist([image], [0, 1, 2], mask, self.bins, [0, 180, 0, 256, 0, 256])
 
         if imutils.is_cv2():
             hist = cv2.normalize(hist).flatten()
