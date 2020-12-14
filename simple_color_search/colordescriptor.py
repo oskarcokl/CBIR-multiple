@@ -13,18 +13,18 @@ class ColorDescriptor:
         features = []
 
         # Dimesnsion of image
-        (h, w) = image.shape[:2] # same as [0:2]
-        (cX, cY) = (int(w / 2), int(h / 2))
+        (height, width) = image.shape[:2] # same as [0:2]
+        (centerX, centerY) = (int(width / 2), int(height / 2))
 
         # Dividing image into 4 rectangle segments (top-left, top-right
         # bottom-left bottom-right)
-        segments = [(0, cX, 0, cY), (cX, w, 0, cY), (cX, w, cY, h), (0, cX, cY, h)]
+        segments = [(0, centerX, 0, centerY), (centerX, width, 0, centerY), (centerX, width, centerY, height), (0, centerX, centerY, height)]
 
         # Eliptical mask for the center of the screen
-        (axesX, axesY) = (int(w *0.75) // 2, int(h * 0.75) // 2)        
+        (axesX, axesY) = (int(width *0.75) // 2, int(height * 0.75) // 2)        
         # Mask is just a black image (that's why we use the zeros)
         ellipsMask = np.zeros(image.shape[:2], dtype="unit8")
-        cv2.ellipse(ellipsMask, (cX, cY), (axesX, axesY), 0, 0, 360, 255, -1)
+        cv2.ellipse(ellipsMask, (centerX, centerY), (axesX, axesY), 0, 0, 360, 255, -1)
 
         # Loop over segments
         for (startX, endX, startY, endY) in segments:
