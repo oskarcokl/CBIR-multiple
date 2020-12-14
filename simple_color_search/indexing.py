@@ -19,7 +19,7 @@ indexFile = open(args["index"], "w")
 
 # Loop over image files with glob
 for imagePath in glob.glob(args["dataset"] + "/*.jpg"):
-    imageID = imagePath[imagePath.rfind("/") + 1:]
+    imageID = imagePath[imagePath.rfind("\\") + 1:]
     image = cv2.imread(imagePath)
 
     # get the features 

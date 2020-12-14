@@ -26,13 +26,14 @@ searcher = Searcher(args["index"])
 results = searcher.search(features)
 
 # Display the query
-cv2.imshow("Query", query)
+queryResized = cv2.resize(query, (720, 480))
+cv2.imshow("Query", queryResized)
 
-print(args["result_path"])
 
 # Loop over the results
 for (score, resultID) in results:
     # Load result image and display it 
     result = cv2.imread(args["result_path"] + "/" + resultID)
-    cv2.imshow("Result", result)
+    resultResized = cv2.resize(result, (720, 480))
+    cv2.imshow("Result", resultResized)
     cv2.waitKey(0)
