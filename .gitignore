@@ -3,3 +3,6 @@ data/
 
 # Ignore python virtual environment files
 venv/
+
+# Ignore the images in the static direcotry
+app/static/images
