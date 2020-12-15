@@ -1,2 +1,5 @@
 # Ignore the data directoy
 data/
+
+# Ignore python virtual environment files
+venv/
