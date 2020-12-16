@@ -4,7 +4,14 @@ let data = [];
 let pathToImages = "../../data/"
 
 for (let image of images) {
+
+
     image.addEventListener("click", function () {
+
+        // Remove stylng from other images.
+        clearImages(images);
+
+
         this.classList.add("active")
         let image = this.src
 
@@ -22,10 +29,6 @@ for (let image of images) {
                 $("#results-table").show();
                 // loop through results, append to dom
                 for (i = 0; i < data.length; i++) {
-                    /*                     console.log('<tr><th><img src="{{ url_for(\'static\', filename=\'images/' + data[i].image +
-                                            '\') }} class="result-img"></th><th>' + data[i].score + '</th></tr>');
-                                        $("#results").append('<tr><th><img src="{{ url_for(\'static\', filename=\'images/' + data[i].image +
-                                            '\') }} class="result-img"></th><th>' + data[i].score + '</th></tr>') */
                     let tr = document.createElement("tr");
                     let thImage = document.createElement("th");
                     let thScore = document.createElement("th");
@@ -49,4 +52,14 @@ for (let image of images) {
             }
         });
     })
+}
+
+const clearImages = (images) => {
+    for (let image of images) {
+        removeClass(image, "active");
+    }
+}
+
+const removeClass = (object, cssClass) => {
+    object.classList.remove(cssClass)
 }
