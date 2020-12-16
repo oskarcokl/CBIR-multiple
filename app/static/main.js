@@ -1,5 +1,5 @@
 // Global variables
-const images = document.querySelectorAll("#query-image");
+const images = document.querySelectorAll(".query-img");
 const algorithmSelectElement = document.querySelector("#algorithm-select");
 const searchingElement = $("#searching");
 const errorElement = $("#error");
@@ -31,8 +31,6 @@ function onQueryImageClick(event) {
     if (isSearching) {
         return
     }
-
-    console.log(event);
 
     handleSearching(true);
 
