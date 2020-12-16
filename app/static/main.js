@@ -1,11 +1,9 @@
 const images = document.querySelectorAll(".img")
 
 let data = [];
-let pathToImages = "../../data/"
+
 
 for (let image of images) {
-
-
     image.addEventListener("click", function () {
 
         // Remove stylng from other images.
@@ -54,8 +52,12 @@ for (let image of images) {
                 console.log(error);
             }
         });
-    })
+    });
 }
+
+document.querySelector("#clearResultsBtn").addEventListener("click", function () {
+    removeChildNodes(document.querySelector("#results"));
+});
 
 const removeChildNodes = (parentNode) => {
     while (parentNode.lastElementChild) {
