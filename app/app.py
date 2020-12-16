@@ -35,11 +35,11 @@ def search():
             from skimage import io
             import cv2
             query = io.imread(image_url)
-            query = (query * 255).astype("uint8")
             # (b, g, r) get transformed into (h, s, v) in the code
             (r, g, b) = cv2.split(query)
             query = cv2.merge([b, g, r])
             features = colorDescriptor.describe(query)
+
 
             # Perform search
             searcher = Searcher(INDEX)
@@ -52,8 +52,7 @@ def search():
                     )
 
 
-            # Return top 3 results
-            return jsonify(results=RESULTS_ARRAY[::-1])
+            return jsonify(results=RESULTS_ARRAY[:10])
 
         except:
 
