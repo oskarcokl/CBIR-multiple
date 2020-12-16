@@ -9,11 +9,14 @@ for (let image of images) {
     image.addEventListener("click", function () {
 
         // Remove stylng from other images.
-        clearImages(images);
+        removeClassAll(images);
 
-
+        // Make the selected image more noticable
         this.classList.add("active")
         let image = this.src
+
+        // Remove previous results
+        removeChildNodes(document.querySelector("#results"));
 
         $.ajax({
             type: "POST",
@@ -54,7 +57,14 @@ for (let image of images) {
     })
 }
 
-const clearImages = (images) => {
+const removeChildNodes = (parentNode) => {
+    while (parentNode.lastElementChild) {
+        parentNode.removeChild(parentNode.lastElementChild);
+    }
+}
+
+
+const removeClassAll = (images) => {
     for (let image of images) {
         removeClass(image, "active");
     }
