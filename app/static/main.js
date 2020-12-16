@@ -2,12 +2,14 @@ const images = document.querySelectorAll(".img")
 
 // Global variables
 const searchingElement = $("#searching");
+const errorElement = $("#error");
 let data = [];
 let isSearching = false;
 
 
 const init = () => {
     handleSearching(false);
+    errorElement.hide();
 
 
     // Setting the event listeners.
@@ -74,6 +76,7 @@ function onQueryImageClick() {
         },
         // handle error
         error: function (error) {
+            errorElement.show();
             console.log(error);
         }
     });
