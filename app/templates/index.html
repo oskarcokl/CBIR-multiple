@@ -8,15 +8,19 @@
         <br>
         <div class="row">
             <div class="col-md-6">
-                <p><img src="{{ url_for('static', filename='images/103100.jpg') }}" style="height: 250px;" class="img">
+                <p><img src="{{ url_for('static', filename='images/103100.jpg') }}" style="height: 250px;"
+                        class="img-fluid query-img">
                 </p>
-                <p><img src="{{ url_for('static', filename='images/103300.jpg') }}" style="height: 250px;" class="img">
+                <p><img src="{{ url_for('static', filename='images/103300.jpg') }}" style="height: 250px;"
+                        class="img-fluid query-img">
                 </p>
             </div>
             <div class="col-md-6">
-                <p><img src="{{ url_for('static', filename='images/127502.jpg') }}" style="height: 250px;" class="img">
+                <p><img src="{{ url_for('static', filename='images/127502.jpg') }}" style="height: 250px;"
+                        class="img-fluid query-img">
                 </p>
-                <p><img src="{{ url_for('static', filename='images/123600.jpg') }}" style="height: 250px;" class="img">
+                <p><img src="{{ url_for('static', filename='images/123600.jpg') }}" style="height: 250px;"
+                        class="img-fluid query-img">
                 </p>
             </div>
         </div>
@@ -25,11 +29,20 @@
                 <button class="btn btn-danger" id="clearResultsBtn">Clear Results</button>
             </div>
         </div>
+        <div class="row">
+            <div class="col-md-6">
+                <form action="">
+                    <div>
+
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
     <div class="col-md-3 col-md-offset-1">
         <h2>Results</h2>
         <h4 id="searching">Searching...</h4>
-        <h4 id="error">Oh no the images couldn't be loaded. Check if you have a stable internet connection.</h4>
+        <h4 id="error">Oh no, the images couldn't be loaded. Check if you have a stable internet connection.</h4>
         <br>
         <table class="table" id="results-table">
             <thead>

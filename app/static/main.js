@@ -1,6 +1,5 @@
-const images = document.querySelectorAll(".img")
-
 // Global variables
+const images = document.querySelectorAll(".query-img")
 const searchingElement = $("#searching");
 const errorElement = $("#error");
 let data = [];
@@ -21,11 +20,13 @@ const init = () => {
     });
 }
 
-function onQueryImageClick() {
+function onQueryImageClick(event) {
     // Check if we are already performing a search.
     if (isSearching) {
         return
     }
+
+    console.log(event);
 
     handleSearching(true);
 
@@ -33,7 +34,7 @@ function onQueryImageClick() {
     removeClassAll(images);
 
     // Make the selected image more noticable
-    this.classList.add("active")
+    makeHighlighted(this);
     let image = this.src
 
     // Remove previous results
@@ -60,7 +61,7 @@ function onQueryImageClick() {
 
                 let resultImg = document.createElement("img");
                 resultImg.src = `static/images/${data[i].image}`
-                resultImg.classList.add("result-image")
+                resultImg.classList.add("img-thumbnail")
 
                 thImage.append(resultImg);
                 thScore.append(`${data[i].score}`);
@@ -82,7 +83,19 @@ function onQueryImageClick() {
     });
 }
 
+const makeHighlighted = (image) => {
+    image.classList.add("border");
+    image.classList.add("border-danger");
+    image.classList.add("border-3");
+    image.classList.add("rounded");
+}
 
+const removeHighlighted = (image) => {
+    image.classList.remove("border");
+    image.classList.remove("border-danger");
+    image.classList.remove("border-3");
+    image.classList.remove("rounded");
+}
 
 const removeChildNodes = (parentNode) => {
     while (parentNode.lastElementChild) {
@@ -101,7 +114,7 @@ const handleSearching = (searching) => {
 
 const removeClassAll = (images) => {
     for (let image of images) {
-        removeClass(image, "active");
+        removeHighlighted(image, "active");
     }
 }
 
