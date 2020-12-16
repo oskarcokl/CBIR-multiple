@@ -1,10 +1,21 @@
 const images = document.querySelectorAll(".img")
 
+// Global variables
+const searchingElement = $("#searching");
 let data = [];
+let isSearching = false;
 
+//handleSearching(false);
 
 for (let image of images) {
     image.addEventListener("click", function () {
+
+        // Check if we are already performing a search.
+        if (isSearching) {
+            return
+        }
+
+        handleSearching(true);
 
         // Remove stylng from other images.
         removeClassAll(images);
@@ -15,6 +26,7 @@ for (let image of images) {
 
         // Remove previous results
         removeChildNodes(document.querySelector("#results"));
+
 
         $.ajax({
             type: "POST",
@@ -46,6 +58,9 @@ for (let image of images) {
 
                     document.querySelector("#results").append(tr);
                 };
+
+                handleSearching(false);
+
             },
             // handle error
             error: function (error) {
@@ -65,6 +80,14 @@ const removeChildNodes = (parentNode) => {
     }
 }
 
+const handleSearching = (searching) => {
+    isSearching = searching;
+    if (searching) {
+        searchingElement.show();
+    } else {
+        searchingElement.hide();
+    }
+}
 
 const removeClassAll = (images) => {
     for (let image of images) {
@@ -74,4 +97,9 @@ const removeClassAll = (images) => {
 
 const removeClass = (object, cssClass) => {
     object.classList.remove(cssClass)
+}
+
+
+window.onload = (event) => {
+    console.log("Page loaded", event);
 }
