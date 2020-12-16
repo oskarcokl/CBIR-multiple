@@ -1,9 +1,11 @@
 // Global variables
-const images = document.querySelectorAll(".query-img")
+const images = document.querySelectorAll("#query-image");
+const algorithmSelectElement = document.querySelector("#algorithm-select");
 const searchingElement = $("#searching");
 const errorElement = $("#error");
 let data = [];
 let isSearching = false;
+let algorithm = "simple";
 
 
 const init = () => {
@@ -18,6 +20,10 @@ const init = () => {
     document.querySelector("#clearResultsBtn").addEventListener("click", function () {
         removeChildNodes(document.querySelector("#results"));
     });
+    algorithmSelectElement.addEventListener("change", function (event) {
+        algorithm = event.target.value;
+        console.log(algorithm);
+    })
 }
 
 function onQueryImageClick(event) {
