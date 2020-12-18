@@ -7,7 +7,7 @@ folder = "..\\..\\data"
 
 
 
-def load_images_from_folder(folder):
+def split_dataset(folder):
 	images = []
 
 	for imagePath in glob.glob(folder + "/*.jpg"):
@@ -26,4 +26,4 @@ def load_images_from_folder(folder):
 		dst = "../../data/test"
 		copy(image, dst)
 
-load_images_from_folder(folder)
+split_dataset(folder)
