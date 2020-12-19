@@ -15,7 +15,6 @@ def split_dataset(folder):
 
 	images_train, images_test = train_test_split(images, test_size=0.2)
 
-
 	for image in images_train:
 		print("Copying ", image)
 		dst = "../../data/train"
@@ -26,4 +25,6 @@ def split_dataset(folder):
 		dst = "../../data/test"
 		copy(image, dst)
 
-split_dataset(folder)
+#split_dataset(folder)
+
+print("hello")
