@@ -1,0 +1,12 @@
+from sift_descriptor import SiftDescriptor
+from searcher import Searcher
+import argparse
+import cv2
+
+argParser = argparse.ArgumentParser()
+argParser.add_argument("-i", "--index", required=True,
+    help="Path to the index file")
+argParser.add_argument("-q", "--query", required=True,
+    help="Path to the query image")
+argParser.add_argument("-r", "--result_path", required=True,
+    help="Path to the result path")

@@ -30,3 +30,18 @@ class ImageLoader:
             
 
         return images, imageIDs
+
+
+    def load_image_and_grayscale(self, path):    
+        images = []
+        imageIDs = []
+        for imageID in os.listdir(folder):
+            fullPathToImage = folder + imageID
+            loadedImage = cv2.imread(fullPathToImage)
+            grayScaledImage = cv2.cvtColor(loadedImage, cv2.COLOR_BGR2GRAY)
+
+            images.append(loadedImage)
+            imageIDs.append(imageID)
+            
+
+        return images, imageIDs

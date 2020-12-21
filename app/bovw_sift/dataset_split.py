@@ -3,7 +3,7 @@ from shutil import copy
 import glob
 from sklearn.model_selection import train_test_split
 
-folder = "..\\..\\data"
+folder = "..\\..\\data\\all"
 
 
 
@@ -13,7 +13,7 @@ def split_dataset(folder):
 	for imagePath in glob.glob(folder + "/*.jpg"):
 		images.append(imagePath)
 
-	images_train, images_test = train_test_split(images, test_size=0.2)
+	images_train, images_test = train_test_split(images, test_size=0.4)
 
 	for image in images_train:
 		print("Copying ", image)
@@ -25,6 +25,5 @@ def split_dataset(folder):
 		dst = "../../data/test"
 		copy(image, dst)
 
-#split_dataset(folder)
+split_dataset(folder)
 
-print("hello")
