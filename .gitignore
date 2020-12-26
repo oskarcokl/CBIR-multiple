@@ -6,3 +6,6 @@ venv/
 
 # Ignore the images in the static direcotry
 app/static/images
+
+# Ignore __pycache__ folder
+app/simple_color_search/__pycache__/

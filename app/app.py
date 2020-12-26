@@ -2,6 +2,7 @@ import os
 
 from flask import Flask, render_template, request, jsonify
 
+import numpy as np
 from simple_color_search.colordescriptor  import ColorDescriptor
 from simple_color_search.searcher import Searcher
 
@@ -24,7 +25,11 @@ def search():
         RESULTS_ARRAY = []
 
         # Get image URL
-        image_url = request.form.get("img")
+
+        print("Hello")
+        
+        filestr = request.files["img"].read()
+
 
         try:
 
@@ -34,12 +39,14 @@ def search():
             # Load querry image and describe it
             from skimage import io
             import cv2
-            query = io.imread(image_url)
-            query = (query * 255).astype("uint8")
-            # (b, g, r) get transformed into (h, s, v) in the code
-            (r, g, b) = cv2.split(query)
-            query = cv2.merge([b, g, r])
+
+            npimg = np.frombuffer(filestr, np.uint8)
+
+            # Query image is already in BGR
+            query = cv2.imdecode(npimg, -1)
+
             features = colorDescriptor.describe(query)
+
 
             # Perform search
             searcher = Searcher(INDEX)
@@ -52,8 +59,7 @@ def search():
                     )
 
 
-            # Return top 3 results
-            return jsonify(results=RESULTS_ARRAY[::-1])
+            return jsonify(results=RESULTS_ARRAY[:10])
 
         except:
 
