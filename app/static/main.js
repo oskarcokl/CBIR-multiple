@@ -14,7 +14,7 @@ const init = () => {
     errorElement.hide();
 
     queryImageElement.hide();
-
+    
     // Setting the event listeners.
     document.querySelector("#queryImage").addEventListener("change", queryImage);
     document.querySelector("#clearResultsBtn").addEventListener("click", function () {
@@ -29,7 +29,6 @@ const init = () => {
 function queryImage(event) {
     const image = this.files[0];
     const formData = new FormData();
-    console.log(image); 
     formData.append("img", image);
 
     // THis can be checked in the HTML itself
@@ -37,6 +36,8 @@ function queryImage(event) {
 	console.log("Please upload an image.")
 	return;
     }
+
+    removeChildNodes(document.querySelector("#results"));
 
     disableImageUpload();
 
