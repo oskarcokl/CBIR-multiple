@@ -16,6 +16,8 @@ INDEX = os.path.join(os.path.dirname(__file__), "./simple_color_search/index.csv
 @app.route("/")
 def index():
     return render_template("index.html")
+    
+
 
 # search route
 @app.route("/search", methods=["POST"])

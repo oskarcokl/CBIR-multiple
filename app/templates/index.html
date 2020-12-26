@@ -2,54 +2,58 @@
 
 {% block content %}
 
-<div class="row" id="bootstrap-overrides">
-    <div class="col-md-7">
-        <h2>Select an Image</h2>
-        <br>
-        <div class="row">
-	    <div>
-	    <label for="queryImage" class="form-label">Large file input example</label>
-	    <input class="form-control form-control-lg" name="queryImage" id="queryImage" type="file">
-	    </div>
-        </div>
-        <div class="mb-4">
-            <label class="form-label fs-4" for="algorithm-select">Select search algorithm</label>
-            <select id="algorithm-select" class="form-select form-select-lg mb-3" aria-label=".form-select-lg example">
-                <option selected value="simple">Simple</option>
-                <option value="bow-and-sift">BoW and SIFT</option>
-                <option value="cnn">CNN</option>
-            </select>
-        </div>
-        <div class="row mb-4">
-            <div class="col-md-6">
-                <button class="btn btn-danger" id="clearResultsBtn">Clear Results</button>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-6">
-                <form action="">
-                    <div>
 
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3 col-md-offset-1">
-        <h2>Results</h2>
-        <h4 id="searching">Searching...</h4>
-        <h4 id="error">Oh no, the images couldn't be loaded. Check if you have a stable internet connection.</h4>
-        <br>
-        <table class="table" id="results-table">
-            <thead>
-                <tr>
-                    <th>Image</th>
-                    <th>Score</th>
-                </tr>
-            </thead>
-            <tbody id="results">
-            </tbody>
-        </table>
+<div class="container">
+    <div class="row" id="bootstrap-overrides">
+	<div class="col-md-7">
+	    <h2>Select an Image</h2>
+	    <br>
+	    <div class="row">
+		<img src="" class="img-fluid" id="query-image-show" >
+	    </div>
+	    <div class="row">
+		<label for="queryImage" class="form-label">Large file input example</label>
+		<input class="form-control form-control" name="queryImage" id="queryImage" type="file">
+	    </div>
+	    <div class="row mb-4">
+		<label class="form-label fs-4" for="algorithm-select">Select search algorithm</label>
+		<select id="algorithm-select" class="form-select form-select-lg mb-3" aria-label=".form-select-lg example">
+		    <option selected value="simple">Simple</option>
+		    <option value="bow-and-sift">BoW and SIFT</option>
+		    <option value="cnn">CNN</option>
+		</select>
+	    </div>
+	    <div class="row mb-4">
+		<div class="col-md-6">
+		    <button class="btn btn-danger" id="clearResultsBtn">Clear Results</button>
+		</div>
+	    </div>
+	    <div class="row">
+		<div class="col-md-6">
+		    <form action="">
+			<div>
+
+			</div>
+		    </form>
+		</div>
+	    </div>
+	</div>
+	<div class="col-md-3 col-md-offset-1">
+	    <h2>Results</h2>
+	    <h4 id="searching">Searching...</h4>
+	    <h4 id="error">Oh no, the images couldn't be loaded. Check if you have a stable internet connection.</h4>
+	    <br>
+	    <table class="table" id="results-table">
+		<thead>
+		    <tr>
+			<th>Image</th>
+			<th>Score</th>
+		    </tr>
+		</thead>
+		<tbody id="results">
+		</tbody>
+	    </table>
+	</div>
     </div>
 </div>
 <br>

@@ -1,6 +1,7 @@
 // Global variables
 const images = document.querySelectorAll(".query-img");
 const algorithmSelectElement = document.querySelector("#algorithm-select");
+const queryImageElement = $("#query-image-show");
 const searchingElement = $("#searching");
 const errorElement = $("#error");
 let data = [];
@@ -12,6 +13,7 @@ const init = () => {
     handleSearching(false);
     errorElement.hide();
 
+    queryImageElement.hide();
 
     // Setting the event listeners.
     document.querySelector("#queryImage").addEventListener("change", queryImage);
@@ -27,16 +29,22 @@ const init = () => {
 function queryImage(event) {
     const image = this.files[0];
     const formData = new FormData();
-
+    console.log(image); 
     formData.append("img", image);
 
+    // THis can be checked in the HTML itself
     if (!isFileImage(image)) {
 	console.log("Please upload an image.")
 	return;
     }
+
+    disableImageUpload();
+
+    displayQueryImage(image);
   
     console.log(image);
 
+    handleSearching(true);
 
     $.ajax({
         type: "POST",
@@ -46,6 +54,7 @@ function queryImage(event) {
         processData: false,
         // handle success
         success: function (result) {
+            handleSearching(false);
             console.log(result.results);
             data = result.results
             // show table
@@ -71,7 +80,8 @@ function queryImage(event) {
                 document.querySelector("#results").append(tr);
             };
 
-            //handleSearching(false);
+	    enableImageUpload();
+
 
         },
         // handle error
@@ -82,26 +92,25 @@ function queryImage(event) {
     });
 }
 
+function displayQueryImage(image) {
+    document.querySelector("#query-image-show").src = URL.createObjectURL(image);
+    queryImageElement.show();
+}
+
+function disableImageUpload() {
+    document.querySelector("#queryImage").disabled = true;
+}
+
+function enableImageUpload() {
+    document.querySelector("#queryImage").disabled = false;
+}
+
 function isFileImage(file) {
     const acceptedImageTypes = ['image/jpeg', 'image/png'];
  
     return file && acceptedImageTypes.includes(file['type'])
 }
 
-
-const makeHighlighted = (image) => {
-    image.classList.add("border");
-    image.classList.add("border-danger");
-    image.classList.add("border-3");
-    image.classList.add("rounded");
-}
-
-const removeHighlighted = (image) => {
-    image.classList.remove("border");
-    image.classList.remove("border-danger");
-    image.classList.remove("border-3");
-    image.classList.remove("rounded");
-}
 
 const removeChildNodes = (parentNode) => {
     while (parentNode.lastElementChild) {
