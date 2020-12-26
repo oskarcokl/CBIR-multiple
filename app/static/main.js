@@ -57,8 +57,10 @@ function queryImage(event) {
                 let thScore = document.createElement("th");
 
                 let resultImg = document.createElement("img");
-                resultImg.src = `static/images/${data[i].image}`
-                resultImg.classList.add("img-thumbnail")
+                resultImg.src = `static/images/${data[i].image}`;
+		resultImg.style.width = "300px";
+		resultImg.style.height = "300px";
+		
 
                 thImage.append(resultImg);
                 thScore.append(`${data[i].score}`);
@@ -86,66 +88,6 @@ function isFileImage(file) {
     return file && acceptedImageTypes.includes(file['type'])
 }
 
-function onQueryImageClick(event) {
-    // Check if we are already performing a search.
-    if (isSearching) {
-        return
-    }
-
-    handleSearching(true);
-
-    // Remove stylng from other images.
-    removeClassAll(images);
-
-    // Make the selected image more noticable
-    makeHighlighted(this);
-    let image = this.src
-
-    // Remove previous results
-    removeChildNodes(document.querySelector("#results"));
-
-
-    $.ajax({
-        type: "POST",
-        url: "/search",
-        data: {
-            img: image
-        },
-        // handle success
-        success: function (result) {
-            console.log(result.results);
-            data = result.results
-            // show table
-            $("#results-table").show();
-            // loop through results, append to dom
-            for (i = 0; i < data.length; i++) {
-                let tr = document.createElement("tr");
-                let thImage = document.createElement("th");
-                let thScore = document.createElement("th");
-
-                let resultImg = document.createElement("img");
-                resultImg.src = `static/images/${data[i].image}`
-                resultImg.classList.add("img-thumbnail")
-
-                thImage.append(resultImg);
-                thScore.append(`${data[i].score}`);
-
-                tr.append(thImage);
-                tr.append(thScore);
-
-                document.querySelector("#results").append(tr);
-            };
-
-            handleSearching(false);
-
-        },
-        // handle error
-        error: function (error) {
-            errorElement.show();
-            console.log(error);
-        }
-    });
-}
 
 const makeHighlighted = (image) => {
     image.classList.add("border");
