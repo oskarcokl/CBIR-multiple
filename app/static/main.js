@@ -14,9 +14,7 @@ const init = () => {
 
 
     // Setting the event listeners.
-    for (let image of images) {
-        image.addEventListener("click", onQueryImageClick);
-    }
+    document.querySelector("#queryImage").addEventListener("change", queryImage);
     document.querySelector("#clearResultsBtn").addEventListener("click", function () {
         removeChildNodes(document.querySelector("#results"));
     });
@@ -24,6 +22,68 @@ const init = () => {
         algorithm = event.target.value;
         console.log(algorithm);
     })
+}
+
+function queryImage(event) {
+    const image = this.files[0];
+    const formData = new FormData();
+
+    formData.append("img", image);
+
+    if (!isFileImage(image)) {
+	console.log("Please upload an image.")
+	return;
+    }
+  
+    console.log(image);
+
+
+    $.ajax({
+        type: "POST",
+        url: "/search",
+        data: formData,
+	contentType: false,
+        processData: false,
+        // handle success
+        success: function (result) {
+            console.log(result.results);
+            data = result.results
+            // show table
+            $("#results-table").show();
+            // loop through results, append to dom
+            for (i = 0; i < data.length; i++) {
+                let tr = document.createElement("tr");
+                let thImage = document.createElement("th");
+                let thScore = document.createElement("th");
+
+                let resultImg = document.createElement("img");
+                resultImg.src = `static/images/${data[i].image}`
+                resultImg.classList.add("img-thumbnail")
+
+                thImage.append(resultImg);
+                thScore.append(`${data[i].score}`);
+
+                tr.append(thImage);
+                tr.append(thScore);
+
+                document.querySelector("#results").append(tr);
+            };
+
+            //handleSearching(false);
+
+        },
+        // handle error
+        error: function (error) {
+            errorElement.show();
+            console.log(error);
+        }
+    });
+}
+
+function isFileImage(file) {
+    const acceptedImageTypes = ['image/jpeg', 'image/png'];
+ 
+    return file && acceptedImageTypes.includes(file['type'])
 }
 
 function onQueryImageClick(event) {
