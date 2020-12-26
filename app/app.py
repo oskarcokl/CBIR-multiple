@@ -25,13 +25,8 @@ def search():
     if request.method == "POST":
 
         RESULTS_ARRAY = []
-
-        # Get image URL
-
-        print("Hello")
         
         filestr = request.files["img"].read()
-
 
         try:
 
@@ -45,8 +40,7 @@ def search():
             npimg = np.frombuffer(filestr, np.uint8)
 
             # Query image is already in BGR
-            query = cv2.imdecode(npimg, -1)
-
+            query = cv2.imdecode(npimg, cv2.IMREAD_COLOR)
             features = colorDescriptor.describe(query)
 
 
