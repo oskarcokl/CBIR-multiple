@@ -5,7 +5,14 @@ data/
 venv/
 
 # Ignore the images in the static direcotry
-app/static/images
+#static/images
 
 # Ignore __pycache__ folder
-app/simple_color_search/__pycache__/
+simple_color_search/__pycache__/
+
+
+# Ignore __pycache__ folder
+bovw_sift/__pycache__/
+
+# Ignore util directory which contans utility scripts
+util
