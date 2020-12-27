@@ -17,9 +17,9 @@ INDEX = os.path.join(os.path.dirname(__file__), "./simple_color_search/index.csv
 def index():
     return render_template("index.html")
 
-# Basic search route
-@app.route("/basic-search", methods=["POST"])
-def basic_search():
+# search route
+@app.route("/search", methods=["POST"])
+def search():
     if request.method == "POST":
 
         RESULTS_ARRAY = []
@@ -64,13 +64,6 @@ def basic_search():
 
             # Return error
             jsonify({"sorry": "Sorry, no results! Please try again."}), 500
-
-
-# BoVW search route
-@app.route("/bovw-search", methods=["POST"])
-def bovw_search():
-    print("You are searching with BOVW")
-
 
 # Run!
 if __name__ == "__main__":
