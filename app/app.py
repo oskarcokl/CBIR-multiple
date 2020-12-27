@@ -30,7 +30,6 @@ def search():
         
         filestr = request.files["img"].read()
 
-
         try:
 
             # Initialize the colordescriptor

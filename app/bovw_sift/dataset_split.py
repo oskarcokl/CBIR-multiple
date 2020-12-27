@@ -13,17 +13,16 @@ def split_dataset(folder):
 	for imagePath in glob.glob(folder + "/*.jpg"):
 		images.append(imagePath)
 
-	images_train, images_test = train_test_split(images, test_size=0.4)
+	images_train, images_test = train_test_split(images, test_size=0.2)
 
-	for image in images_train:
-		print("Copying ", image)
-		dst = "../../data/train"
-		copy(image, dst)
+	# for image in images_train:
+	# 	print("Copying ", image)
+	# 	dst = "../../data/train"
+	# 	copy(image, dst)
 
 	for image in images_test:
 		print("Copying ", image)
-		dst = "../../data/test"
+		dst = "../../data/min"
 		copy(image, dst)
 
 split_dataset(folder)
-
