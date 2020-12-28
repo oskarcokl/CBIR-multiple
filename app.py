@@ -93,18 +93,12 @@ def bovw_search():
             clusters = load(CLUSTER)
             query_histogram = historgamBuilder.buil_histogram_from_clusters(dscriptors, clusters)
 
-            (distances, results) = searcher.search(query_histogram, 10)
-
-            features = colorDescriptor.describe(query)
-
-
-            # Perform search
-            results  = searcher.search(features)
+            (distances, image_ids) = searcher.search(query_histogram, 10)
 
             # Loop over the results and displaying score and image name
-            for (score, resultID) in results:
+            for i in len(image_ids):
                 RESULTS_ARRAY.append(
-                    {"image": str(resultID), "score": str(score)}
+                    {"image": str(image_ids[i]), "score": str(distances[i])}
                     )
 
 
