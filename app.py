@@ -9,6 +9,7 @@ from simple_color_search.searcher import Searcher
 
 # Create flast instance
 app = Flask(__name__)
+app.config["DEBUG"] = True
 
 INDEX = os.path.join(os.path.dirname(__file__), "./simple_color_search/index.csv")
 
@@ -27,7 +28,7 @@ def basic_search():
         # Get image URL
 
         print("Hello")
-        
+
         filestr = request.files["img"].read()
 
         try:
@@ -74,4 +75,4 @@ def bovw_search():
 
 # Run!
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run()
