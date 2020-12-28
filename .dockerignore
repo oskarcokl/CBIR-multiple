@@ -5,10 +5,11 @@ data/
 venv/
 
 # Ignore the images in the static direcotry
-#static/images
+static/images
 
 # Ignore __pycache__ folder
-simple_color_search/__pycache__
+simple_color_search/__pycache__/
+
 
 # Ignore __pycache__ folder
 bovw_sift/__pycache__/
@@ -16,9 +17,8 @@ bovw_sift/__pycache__/
 # Ignore util directory which contans utility scripts
 util
 
-## Python ignores
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*__pycache__/
-*.py[cod]
-*$py.class
+# Ignore the procfile
+Procfile
+
+# Ignore emacs temp files
+*~*
