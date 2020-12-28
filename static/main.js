@@ -46,7 +46,6 @@ function queryImage(event) {
     console.log(image);
 
     handleSearching(true);
-
     $.ajax({
         type: "POST",
         url: "/search",
@@ -54,44 +53,49 @@ function queryImage(event) {
 	contentType: false,
         processData: false,
         // handle success
-        success: function (result) {
-            handleSearching(false);
-            console.log(result.results);
-            data = result.results
-            // show table
-            $("#results-table").show();
-            // loop through results, append to dom
-            for (i = 0; i < data.length; i++) {
-                let tr = document.createElement("tr");
-                let thImage = document.createElement("th");
-                let thScore = document.createElement("th");
-
-                let resultImg = document.createElement("img");
-                resultImg.src = `static/images/${data[i].image}`;
-		resultImg.style.width = "300px";
-		resultImg.style.height = "300px";
-		
-
-                thImage.append(resultImg);
-                thScore.append(`${data[i].score}`);
-
-                tr.append(thImage);
-                tr.append(thScore);
-
-                document.querySelector("#results").append(tr);
-            };
-
-	    enableImageUpload();
-
-
-        },
+        success: displayResults,
         // handle error
         error: function (error) {
             errorElement.show();
             console.log(error);
         }
     });
+
+    handleSearching(false);
+    enableImageUpload();
 }
+function displayResults(result) {
+    console.log(result.results);
+    data = result.results
+    // show table
+    $("#results-table").show();
+    // loop through results, append to dom
+    for (i = 0; i < data.length; i++) {
+	let tr = document.createElement("tr");
+	let thImage = document.createElement("th");
+	let thScore = document.createElement("th");
+
+	let resultImg = document.createElement("img");
+	resultImg.src = `static/images/${data[i].image}`;
+	resultImg.style.width = "300px";
+	resultImg.style.height = "300px";
+
+
+	thImage.append(resultImg);
+	thScore.append(`${data[i].score}`);
+
+	tr.append(thImage);
+	tr.append(thScore);
+
+	document.querySelector("#results").append(tr);
+    };
+
+}
+
+
+
+
+
 
 function displayQueryImage(image) {
     document.querySelector("#query-image-show").src = URL.createObjectURL(image);

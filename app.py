@@ -4,7 +4,9 @@ from flask import Flask, render_template, request, jsonify
 
 import numpy as np
 from simple_color_search.colordescriptor  import ColorDescriptor
-from simple_color_search.searcher import Searcher
+from simple_color_search.searcher import Searcher as SearcherSimple
+from bovw_sift.searcher import Searcher as SearcherBovw
+from bovw_sift.sfit_descriptor import SiftDescriptor
 
 
 # Create flast instance
@@ -35,7 +37,6 @@ def basic_search():
             colorDescriptor = ColorDescriptor((8, 12, 3))
 
             # Load querry image and describe it
-            from skimage import io
             import cv2
 
             npimg = np.frombuffer(filestr, np.uint8)

@@ -1,4 +1,0 @@
-[uwsgi]
-module = main
-callabe = app
-master = true
