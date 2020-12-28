@@ -3,10 +3,12 @@ import os
 from flask import Flask, render_template, request, jsonify
 
 import numpy as np
+from joblib import load
 from simple_color_search.colordescriptor  import ColorDescriptor
 from simple_color_search.searcher import Searcher as SearcherSimple
 from bovw_sift.searcher import Searcher as SearcherBovw
-from bovw_sift.sfit_descriptor import SiftDescriptor
+from bovw_sift.sift_descriptor import SiftDescriptor
+from bovw_sift.histogram_builder import HistogramBuilder
 
 
 # Create flast instance
@@ -14,7 +16,7 @@ app = Flask(__name__)
 app.config["DEBUG"] = True
 
 INDEX_SIMPLE = os.path.join(os.path.dirname(__file__), "./simple_color_search/index.csv")
-INDEX_BOVW = os.path.join(os.path.dirname(__file__), "./bovw_sift/index.csv")
+INDEX_BOVW = os.path.join(os.path.dirname(__file__), "./bovw_sift/index_all.csv")
 CLUSTER=os.path.join(os.path.dirname(__file__), "./bovw_sift/train_k_means.joblib")
 
 
@@ -24,13 +26,15 @@ def index():
     return render_template("index.html")
 
 # Basic search route
-@app.route("/basic-search", methods=["POST"])
+@app.route("/simple-search", methods=["POST"])
 def basic_search():
     if request.method == "POST":
 
         RESULTS_ARRAY = []
         filestr = request.files["img"].read()
 
+        print("Hello")
+        
         try:
 
             # Initialize the colordescriptor
@@ -48,7 +52,7 @@ def basic_search():
 
 
             # Perform search
-            searcher = Searcher(INDEX)
+            searcher = SearcherSimple(INDEX_SIMPLE)
             results  = searcher.search(features)
 
             # Loop over the results and displaying score and image name
@@ -60,8 +64,10 @@ def basic_search():
 
             return jsonify(results=RESULTS_ARRAY[:10])
 
-        except:
+        except Exception as isnt:
 
+            print(inst)
+            
             # Return error
             jsonify({"sorry": "Sorry, no results! Please try again."}), 500
 
@@ -72,32 +78,42 @@ def bovw_search():
     if request.method == "POST":
 
         RESULTS_ARRAY = []
-
+        
         filestr = request.files["img"].read()
 
-        try: 
+        try:
+
+            print("Loading the modules.")
             # Initialize the colordescriptor
             siftDescriptor = SiftDescriptor()
             histogramBuilder = HistogramBuilder()
-            # TODO change name of Searcher objects so there isn't a conflict.
-            searcher = Searcher(INDEX_BOVW)
+            searcher = SearcherBovw(INDEX_BOVW)
 
             # Load querry image and describe it
             import cv2
 
+            print("Loading the image.")
             npimg = np.frombuffer(filestr, np.uint8)
             # Query image is already in BGR
             query_image = cv2.imdecode(npimg, -1)
             query_image_grayscale = cv2.cvtColor(query_image, cv2.COLOR_BGR2GRAY)
-            descriptors = siftDescriptor.describe(query_image_grayscale)
-            
+            print("Getting descriptors.")
+            descriptors = siftDescriptor.describe(query_image_grayscale) 
+            print("Loading cluster.")
             clusters = load(CLUSTER)
-            query_histogram = historgamBuilder.buil_histogram_from_clusters(dscriptors, clusters)
+            
+            print("Computing histogram.")
+            query_histogram = histogramBuilder.build_histogram_from_clusters(descriptors, clusters)
 
+            print(query_histogram)
+            
+            print("Performing search.")
             (distances, image_ids) = searcher.search(query_histogram, 10)
+            print("Finished search.")
 
+            print(image_ids, distances)
             # Loop over the results and displaying score and image name
-            for i in len(image_ids):
+            for i in range(len(image_ids)):
                 RESULTS_ARRAY.append(
                     {"image": str(image_ids[i]), "score": str(distances[i])}
                     )
@@ -105,13 +121,13 @@ def bovw_search():
 
             return jsonify(results=RESULTS_ARRAY[:10])
 
-        except:
-
+        except Exception as inst:
+            print(inst)
+            
             # Return error
             jsonify({"sorry": "Sorry, no results! Please try again."}), 500
-    print("You are searching with BOVW")
 
 
 # Run!
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=True)

@@ -37,33 +37,35 @@ function queryImage(event) {
 	return;
     }
 
+    const endpoint = "/" + algorithm + "-search";
+
+    console.log("Using", algorithm);
+
     removeChildNodes(document.querySelector("#results"));
-
     disableImageUpload();
-
-    displayQueryImage(image);
-  
-    console.log(image);
+    displayQueryImage(image);  
 
     handleSearching(true);
     $.ajax({
         type: "POST",
-        url: "/search",
+        url: endpoint,
         data: formData,
 	contentType: false,
         processData: false,
         // handle success
-        success: displayResults,
+        success: function(result) {
+	    displayResults(result);
+	},
         // handle error
         error: function (error) {
             errorElement.show();
             console.log(error);
         }
     });
-
     handleSearching(false);
     enableImageUpload();
 }
+
 function displayResults(result) {
     console.log(result.results);
     data = result.results
@@ -89,12 +91,7 @@ function displayResults(result) {
 
 	document.querySelector("#results").append(tr);
     };
-
 }
-
-
-
-
 
 
 function displayQueryImage(image) {
