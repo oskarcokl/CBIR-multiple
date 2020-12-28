@@ -31,19 +31,13 @@ descriptors = siftDescriptor.describe(query_image_grayscale)
 clusters = load("train_k_means.joblib")
 query_histogram = histogramBuilder.build_histogram_from_clusters(descriptors, clusters)
 
-(distance, results) = searcher.search(query_histogram, 10)
+(distance, image_ids) = searcher.search(query_histogram, 10)
 
 query_resized = cv2.resize(query_image, (720, 480))
 cv2.imshow("Query", query_resized)
 
-
-with open(args["index"]) as index:
-    csvReader = csv.reader(index)
-    image_ids = [row[0] for row in csv.reader(index)]
-index.close()
-
-for result in results[0]:
-    result_image = cv2.imread(args["result_path"] + image_ids[result])
+for image_id in image_ids:
+    result_image = cv2.imread(args["result_path"] + image_id)
     result_resized = cv2.resize(result_image, (720, 480))
     cv2.imshow("Result", result_resized)
     cv2.waitKey(0)
