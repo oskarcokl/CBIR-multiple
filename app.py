@@ -11,7 +11,9 @@ from simple_color_search.searcher import Searcher
 app = Flask(__name__)
 app.config["DEBUG"] = True
 
-INDEX = os.path.join(os.path.dirname(__file__), "./simple_color_search/index.csv")
+INDEX_SIMPLE = os.path.join(os.path.dirname(__file__), "./simple_color_search/index.csv")
+INDEX_BOVW = os.path.join(os.path.dirname(__file__), "./bovw_sift/index.csv")
+
 
 # Main route
 @app.route("/")
@@ -69,7 +71,47 @@ def basic_search():
 
 # BoVW search route
 @app.route("/bovw-search", methods=["POST"])
-def bovw_search():
+def bovw_search(): 
+    if request.method == "POST":
+
+        RESULTS_ARRAY = []
+
+        filestr = request.files["img"].read()
+
+        try: 
+            # Initialize the colordescriptor
+            siftDescriptor = SiftDescriptor()
+            histogramBuilder = HistogramBuilder()
+            searcher = Searcher(
+
+            # Load querry image and describe it
+            from skimage import io
+            import cv2
+
+            npimg = np.frombuffer(filestr, np.uint8)
+
+            # Query image is already in BGR
+            query = cv2.imdecode(npimg, -1)
+
+            features = colorDescriptor.describe(query)
+
+
+            # Perform search
+            results  = searcher.search(features)
+
+            # Loop over the results and displaying score and image name
+            for (score, resultID) in results:
+                RESULTS_ARRAY.append(
+                    {"image": str(resultID), "score": str(score)}
+                    )
+
+
+            return jsonify(results=RESULTS_ARRAY[:10])
+
+        except:
+
+            # Return error
+            jsonify({"sorry": "Sorry, no results! Please try again."}), 500
     print("You are searching with BOVW")
 
 
