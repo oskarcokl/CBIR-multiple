@@ -3,6 +3,7 @@ data/
 
 # Ignore python virtual environment files
 venv/
+cbir/
 
 # Ignore the images in the static direcotry
 static/images
