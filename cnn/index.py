@@ -87,7 +87,7 @@ def train_kmeans(args, model):
         feature_list.append(features_numpy.flatten())
 
     feature_array = np.array(feature_list)
-    kmeans_model = KMeans(n_clusters=512)
+    kmeans_model = KMeans(n_clusters=10000)
     dump(kmeans_model, "kmeans_model.joblib")
 
 index()
