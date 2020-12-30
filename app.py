@@ -4,12 +4,20 @@ from flask import Flask, render_template, request, jsonify
 
 import numpy as np
 from joblib import load
+import tensorflow as tf
+from tensorflow import keras
+from tensorflow.keras.applications.vgg16 import VGG16
+from tensorflow.keras.applications.vgg16 import preprocess_input
+from tensorflow.keras.preprocessing import image
+
 from simple_color_search.colordescriptor  import ColorDescriptor
 from simple_color_search.searcher import Searcher as SearcherSimple
+
 from bovw_sift.searcher import Searcher as SearcherBovw
 from bovw_sift.sift_descriptor import SiftDescriptor
 from bovw_sift.histogram_builder import HistogramBuilder
 
+from cnn.searcher import Searcher as SearcherCNN
 
 # Create flast instance
 app = Flask(__name__)
@@ -17,6 +25,7 @@ app.config["DEBUG"] = True
 
 INDEX_SIMPLE = os.path.join(os.path.dirname(__file__), "./simple_color_search/index.csv")
 INDEX_BOVW = os.path.join(os.path.dirname(__file__), "./bovw_sift/index_all.csv")
+INDEX_CNN = os.path.join(os.path.dirname(__file__), "./cnn/index.csv")
 CLUSTER=os.path.join(os.path.dirname(__file__), "./bovw_sift/train_k_means.joblib")
 
 
@@ -127,6 +136,47 @@ def bovw_search():
             # Return error
             jsonify({"sorry": "Sorry, no results! Please try again."}), 500
 
+
+@app.route("/cnn-search", methods=["POST"])
+def cnn_search():
+    if request.method == "POST":
+        RESULTS_ARRAY = []
+        filestr = request.files["img"].read()
+
+        try:
+            if os.path.isdir("cnn/vgg16"):
+                model = keras.models.load_model("cnn/vgg16")
+            else:
+                print("No vgg16 model :(")
+                return ""
+
+            searcher = SearcherCNN(INDEX_CNN)
+
+            import cv2
+            img = np.frombuffer(filestr, np.uint8)
+            query_image = cv2.imdecode(img, -1)
+            resized_query_image = cv2.resize(query_image, (244, 244))
+            img_array = np.expand_dims(resized_query_image, axis=0)
+
+            query_features = model.predict(img_array)
+            features_numpy = np.array(query_features)
+
+            print("Hello")
+
+            (dist, img_ids) = searcher.search(features_numpy.flatten(), 10)
+            print("Yo this hist works")
+
+            
+            for i in range(len(img_ids)):
+                RESULTS_ARRAY.append(
+                    {"image": str(img_ids[i]), "score": str(dist[i])}
+                    )
+
+
+            return jsonify(results=RESULTS_ARRAY[:10])
+        except:
+            jsonify({"sorry": "Sorry, no results! Please try again."}), 500
+            
 
 # Run!
 if __name__ == "__main__":
