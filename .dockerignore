@@ -3,6 +3,7 @@ data/
 
 # Ignore python virtual environment files
 venv/
+cbir/
 
 # Ignore the images in the static direcotry
 static/images
@@ -13,6 +14,10 @@ simple_color_search/__pycache__/
 
 # Ignore __pycache__ folder
 bovw_sift/__pycache__/
+
+
+# Ignore __pycache__ folder
+cnn/__pycache__/
 
 # Ignore util directory which contans utility scripts
 util
