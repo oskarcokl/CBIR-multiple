@@ -6,7 +6,7 @@ venv/
 cbir/
 
 # Ignore the images in the static direcotry
-static/images
+#static/images
 
 # Ignore __pycache__ folder
 simple_color_search/__pycache__/
@@ -27,3 +27,11 @@ Procfile
 
 # Ignore emacs temp files
 *~*
+
+
+## Python ignores
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*__pycache__/
+*.py[cod]
+*$py.class

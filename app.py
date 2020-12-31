@@ -117,14 +117,18 @@ def bovw_search():
             print(query_histogram)
             
             print("Performing search.")
-            (distances, image_ids) = searcher.search(query_histogram, 10)
+            results = searcher.search(query_histogram, 10)
             print("Finished search.")
 
-            print(image_ids, distances)
             # Loop over the results and displaying score and image name
-            for i in range(len(image_ids)):
+            # for i in range(len(image_ids)):
+            #     RESULTS_ARRAY.append(
+            #         {"image": str(image_ids[i]), "score": str(distances[i])}
+            #         )
+
+            for (score, resultID) in results:
                 RESULTS_ARRAY.append(
-                    {"image": str(image_ids[i]), "score": str(distances[i])}
+                    {"image": str(resultID), "score": str(score)}
                     )
 
 
@@ -180,4 +184,4 @@ def cnn_search():
 
 # Run!
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="0.0.0.0", debug=False)
