@@ -40,12 +40,12 @@ function queryImage(event) {
     const endpoint = "/" + algorithm + "-search";
 
     console.log("Using", algorithm);
+    handleSearching(true);
 
     removeChildNodes(document.querySelector("#results"));
     disableImageUpload();
     displayQueryImage(image);  
 
-    handleSearching(true);
     $.ajax({
         type: "POST",
         url: endpoint,
@@ -62,8 +62,6 @@ function queryImage(event) {
             console.log(error);
         }
     });
-    handleSearching(false);
-    enableImageUpload();
 }
 
 function displayResults(result) {
@@ -91,6 +89,8 @@ function displayResults(result) {
 
 	document.querySelector("#results").append(tr);
     };
+    handleSearching(false);
+    enableImageUpload();
 }
 
 
@@ -121,6 +121,7 @@ const removeChildNodes = (parentNode) => {
 }
 
 const handleSearching = (searching) => {
+    console.log("You what the fuck")
     isSearching = searching;
     if (searching) {
         searchingElement.show();
