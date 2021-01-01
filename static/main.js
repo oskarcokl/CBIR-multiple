@@ -121,7 +121,6 @@ const removeChildNodes = (parentNode) => {
 }
 
 const handleSearching = (searching) => {
-    console.log("You what the fuck")
     isSearching = searching;
     if (searching) {
         searchingElement.show();

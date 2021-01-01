@@ -92,7 +92,6 @@ def bovw_search():
 
         try:
 
-            print("Loading the modules.")
             # Initialize the colordescriptor
             siftDescriptor = SiftDescriptor()
             histogramBuilder = HistogramBuilder()
@@ -101,24 +100,17 @@ def bovw_search():
             # Load querry image and describe it
             import cv2
 
-            print("Loading the image.")
             npimg = np.frombuffer(filestr, np.uint8)
             # Query image is already in BGR
             query_image = cv2.imdecode(npimg, -1)
             query_image_grayscale = cv2.cvtColor(query_image, cv2.COLOR_BGR2GRAY)
-            print("Getting descriptors.")
             descriptors = siftDescriptor.describe(query_image_grayscale) 
-            print("Loading cluster.")
             clusters = load(CLUSTER)
             
-            print("Computing histogram.")
             query_histogram = histogramBuilder.build_histogram_from_clusters(descriptors, clusters)
 
-            print(query_histogram)
             
-            print("Performing search.")
             (distances, image_ids) = searcher.search(query_histogram, 10)
-            print("Finished search.")
 
             # Loop over the results and displaying score and image name
             for i in range(len(image_ids)):
@@ -146,8 +138,7 @@ def cnn_search():
             if os.path.isdir("cnn/vgg16"):
                 model = keras.models.load_model("cnn/vgg16")
             else:
-                print("No vgg16 model :(")
-                return ""
+                model = VGG16(weights="imagenet", include_top=False)
 
             searcher = SearcherCNN(INDEX_CNN)
 
@@ -179,4 +170,4 @@ def cnn_search():
 
 # Run!
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", debug=True)
+    app.run(host="0.0.0.0", debug=False)
