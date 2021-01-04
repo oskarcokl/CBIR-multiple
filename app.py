@@ -42,8 +42,6 @@ def all_search():
         # Can reach the endpoint
         print("You are searching with all of the algorythms.")
         RESULTS_ARRAY_JSON = []
-
-        print(basic_search(filestr))
         
         print("Searching basic")
         RESULTS_ARRAY_JSON.append(basic_search(filestr))
@@ -59,7 +57,9 @@ def all_search():
         
         print(RESULTS_ARRAY_JSON)
 
-        return ""
+        return jsonify(basic=RESULTS_ARRAY_JSON[0],
+                       bovw=RESULTS_ARRAY_JSON[1],
+                       cnn=RESULTS_ARRAY_JSON[2])
     
 # Basic search route
 @app.route("/simple-search", methods=["POST"])

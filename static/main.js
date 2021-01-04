@@ -10,6 +10,8 @@ let algorithm = "simple";
 
 
 const init = () => {
+    $("#results-table").hide();
+
     handleSearching(false);
     errorElement.hide();
 
@@ -17,13 +19,11 @@ const init = () => {
     
     // Setting the event listeners.
     document.querySelector("#queryImage").addEventListener("change", queryImage);
-    document.querySelector("#clearResultsBtn").addEventListener("click", function () {
-        removeChildNodes(document.querySelector("#results"));
-    });
-    algorithmSelectElement.addEventListener("change", function (event) {
-        algorithm = event.target.value;
-        console.log(algorithm);
-    })
+    document.querySelector("#clearResultsBtn").addEventListener("click",removeResults);
+    // algorithmSelectElement.addEventListener("change", function (event) {
+    //     algorithm = event.target.value;
+    //     console.log(algorithm);
+    // })
 }
 
 function queryImage(event) {
@@ -42,9 +42,10 @@ function queryImage(event) {
     console.log("Using", algorithm);
     handleSearching(true);
 
-    removeChildNodes(document.querySelector("#results"));
+
+    removeResults();
     disableImageUpload();
-    displayQueryImage(image);  
+    displayQueryImage(image);
 
     $.ajax({
         type: "POST",
@@ -54,7 +55,7 @@ function queryImage(event) {
         processData: false,
         // handle success
         success: function(result) {
-	    displayResults(result);
+	    displayResultsAll(result);
 	},
         // handle error
         error: function (error) {
@@ -63,6 +64,24 @@ function queryImage(event) {
         }
     });
 }
+
+function removeResults() { 
+    $("#results-table").hide();
+    removeChildNodes(document.querySelector("#results-basic"));
+    removeChildNodes(document.querySelector("#results-bovw"));
+    removeChildNodes(document.querySelector("#results-cnn"));
+}
+
+function displayResultsAll(result) {
+    console.log(result);
+    $("#results-table").show();
+    styleResultsAndShow(result.basic, "#results-basic");
+    styleResultsAndShow(result.bovw, "#results-bovw");
+    styleResultsAndShow(result.cnn, "#results-cnn");
+    handleSearching(false);
+    enableImageUpload();
+}
+
 
 function displayResults(result) {
     console.log(result.results);
@@ -73,7 +92,6 @@ function displayResults(result) {
     for (i = 0; i < data.length; i++) {
 	let tr = document.createElement("tr");
 	let thImage = document.createElement("th");
-	let thScore = document.createElement("th");
 
 	let resultImg = document.createElement("img");
 	resultImg.src = `static/images/${data[i].image}`;
@@ -82,15 +100,33 @@ function displayResults(result) {
 
 
 	thImage.append(resultImg);
-	thScore.append(`${data[i].score}`);
 
 	tr.append(thImage);
-	tr.append(thScore);
 
 	document.querySelector("#results").append(tr);
     };
     handleSearching(false);
     enableImageUpload();
+}
+
+function styleResultsAndShow(data, id) {
+    for (i = 0; i < data.length; i++) {
+	let tr = document.createElement("tr");
+	let thImage = document.createElement("th");
+
+	let resultImg = document.createElement("img");
+	resultImg.src = `static/images/${data[i].image}`;
+	resultImg.style.width = "300px";
+	resultImg.style.height = "300px";
+
+
+	thImage.append(resultImg);
+
+	tr.append(thImage);
+
+	document.querySelector(id).append(tr);
+    };
+
 }
 
 
@@ -143,4 +179,5 @@ const removeClass = (object, cssClass) => {
 window.onload = (event) => {
     console.log("Page loaded");
     init();
+
 }
