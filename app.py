@@ -63,42 +63,46 @@ def bovw():
 @app.route("/cnn-search", methods=["POST"])
 def cnn():
     if request.method == "POST":
-        RESULTS_ARRAY = []
         filestr = request.files["img"].read()
-
-        try:
-            if os.path.isdir("cnn/vgg16"):
-                model = keras.models.load_model("cnn/vgg16")
-            else:
-                model = VGG16(weights="imagenet", include_top=False)
-
-            searcher = SearcherCNN(INDEX_CNN)
-
-            import cv2
-            img = np.frombuffer(filestr, np.uint8)
-            query_image = cv2.imdecode(img, -1)
-            resized_query_image = cv2.resize(query_image, (244, 244))
-            img_array = np.expand_dims(resized_query_image, axis=0)
-
-            query_features = model.predict(img_array)
-            features_numpy = np.array(query_features)
-
-            print("Hello")
-
-            (dist, img_ids) = searcher.search(features_numpy.flatten(), 10)
-            print("Yo this hist works")
-
-            
-            for i in range(len(img_ids)):
-                RESULTS_ARRAY.append(
-                    {"image": str(img_ids[i]), "score": str(dist[i])}
-                    )
+        return cnn_search(filestr)
 
 
-            return jsonify(results=RESULTS_ARRAY[:10])
-        except:
-            jsonify({"sorry": "Sorry, no results! Please try again."}), 500            
+def cnn_search(filestr): 
+    RESULTS_ARRAY = []
+    try:
+        if os.path.isdir("cnn/vgg16"):
+            model = keras.models.load_model("cnn/vgg16")
+        else:
+            model = VGG16(weights="imagenet", include_top=False)
 
+        searcher = SearcherCNN(INDEX_CNN)
+
+        import cv2
+        img = np.frombuffer(filestr, np.uint8)
+        query_image = cv2.imdecode(img, -1)
+        resized_query_image = cv2.resize(query_image, (244, 244))
+        img_array = np.expand_dims(resized_query_image, axis=0)
+
+        query_features = model.predict(img_array)
+        features_numpy = np.array(query_features)
+
+        print("Hello")
+
+        (dist, img_ids) = searcher.search(features_numpy.flatten(), 10)
+        print("Yo this hist works")
+
+
+        for i in range(len(img_ids)):
+            RESULTS_ARRAY.append(
+                {"image": str(img_ids[i]), "score": str(dist[i])}
+                )
+
+
+        return jsonify(results=RESULTS_ARRAY[:10])
+    except:
+        return jsonify({"sorry": "Sorry, no results! Please try again."}), 500            
+
+    
 def bovw_search(filestr): 
     RESULTS_ARRAY = []
     try:
