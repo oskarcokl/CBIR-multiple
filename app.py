@@ -37,18 +37,37 @@ def index():
 @app.route("/all-search", methods=["POST"])
 def all_search():
 
-    # Can reach the endpoint
-    print("You are searching with all of the algorythms.")
-    
+    if request.method == "POST":
+        filestr = request.files["img"].read()
+        # Can reach the endpoint
+        print("You are searching with all of the algorythms.")
+        RESULTS_ARRAY_JSON = []
 
-    return ""
+        print(basic_search(filestr))
+        
+        print("Searching basic")
+        RESULTS_ARRAY_JSON.append(basic_search(filestr))
+        print("Done basic")
+        print("Searching bovw")
+        RESULTS_ARRAY_JSON.append(bovw_search(filestr))
+        print("Done bovw")
+        print("Searching cnn")
+        RESULTS_ARRAY_JSON.append(cnn_search(filestr))
+        print("Done cnn")
+        print("Done searching")
+
+        
+        print(RESULTS_ARRAY_JSON)
+
+        return ""
     
 # Basic search route
 @app.route("/simple-search", methods=["POST"])
 def basic():
     if request.method == "POST":
         filestr = request.files["img"].read()
-        return basic_search(filestr);
+        RESULTS_ARRAY = basic_search(filestr);
+        return jsonify(results=RESULTS_ARRAY)
         
         
 # BoVW search route
@@ -56,7 +75,8 @@ def basic():
 def bovw(): 
     if request.method == "POST": 
         filestr = request.files["img"].read()
-        return bovw_search(filestr)
+        RESULTS_ARRAY = bovw_search(filestr)
+        return jsonify(results=RESULTS_ARRAY)
 
 
 
@@ -64,7 +84,8 @@ def bovw():
 def cnn():
     if request.method == "POST":
         filestr = request.files["img"].read()
-        return cnn_search(filestr)
+        RESULTS_ARRAY =  cnn_search(filestr)
+        return jsonify(results=RESULTS_ARRAY)
 
 
 def cnn_search(filestr): 
@@ -98,7 +119,7 @@ def cnn_search(filestr):
                 )
 
 
-        return jsonify(results=RESULTS_ARRAY[:10])
+        return RESULTS_ARRAY[:10]
     except:
         return jsonify({"sorry": "Sorry, no results! Please try again."}), 500            
 
@@ -133,7 +154,7 @@ def bovw_search(filestr):
                 )
 
 
-        return jsonify(results=RESULTS_ARRAY[:10])
+        return RESULTS_ARRAY[:10]
 
     except Exception as inst:
         print(inst)
@@ -171,7 +192,7 @@ def basic_search(filestr):
                 )
 
 
-        return jsonify(results=RESULTS_ARRAY[:10])
+        return RESULTS_ARRAY[:10]
 
     except Exception as inst:
 
