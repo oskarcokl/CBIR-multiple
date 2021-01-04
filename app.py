@@ -21,7 +21,6 @@ from cnn.searcher import Searcher as SearcherCNN
 
 # Create flast instance
 app = Flask(__name__)
-app.config["DEBUG"] = True
 
 INDEX_SIMPLE = os.path.join(os.path.dirname(__file__), "./simple_color_search/index.csv")
 INDEX_BOVW = os.path.join(os.path.dirname(__file__), "./bovw_sift/index_all.csv")
@@ -34,6 +33,15 @@ CLUSTER=os.path.join(os.path.dirname(__file__), "./bovw_sift/train_k_means.jobli
 def index():
     return render_template("index.html")
 
+# All search
+@app.route("/all-search", methods=["POST"])
+def all_search():
+
+    print("You are searching with all of the algorythms.")
+    
+
+    return ""
+    
 # Basic search route
 @app.route("/simple-search", methods=["POST"])
 def basic_search():
@@ -75,7 +83,7 @@ def basic_search():
 
         except Exception as isnt:
 
-            print(inst)
+            print(isnt)
             
             # Return error
             jsonify({"sorry": "Sorry, no results! Please try again."}), 500
@@ -170,4 +178,4 @@ def cnn_search():
 
 # Run!
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", debug=False)
+    app.run(host="0.0.0.0", debug=True)
