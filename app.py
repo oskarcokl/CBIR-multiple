@@ -37,6 +37,7 @@ def index():
 @app.route("/all-search", methods=["POST"])
 def all_search():
 
+    # Can reach the endpoint
     print("You are searching with all of the algorythms.")
     
 
@@ -44,54 +45,19 @@ def all_search():
     
 # Basic search route
 @app.route("/simple-search", methods=["POST"])
-def basic_search():
+def basic():
     if request.method == "POST":
 
-        RESULTS_ARRAY = []
         filestr = request.files["img"].read()
 
-        print("Hello")
+        return basic_search(filestr);
         
-        try:
-
-            # Initialize the colordescriptor
-            colorDescriptor = ColorDescriptor((8, 12, 3))
-
-            # Load querry image and describe it
-            import cv2
-
-            npimg = np.frombuffer(filestr, np.uint8)
-
-            # Query image is already in BGR
-            query = cv2.imdecode(npimg, -1)
-
-            features = colorDescriptor.describe(query)
-
-
-            # Perform search
-            searcher = SearcherSimple(INDEX_SIMPLE)
-            results  = searcher.search(features)
-
-            # Loop over the results and displaying score and image name
-            for (score, resultID) in results:
-                RESULTS_ARRAY.append(
-                    {"image": str(resultID), "score": str(score)}
-                    )
-
-
-            return jsonify(results=RESULTS_ARRAY[:10])
-
-        except Exception as isnt:
-
-            print(isnt)
-            
-            # Return error
-            jsonify({"sorry": "Sorry, no results! Please try again."}), 500
+        
 
 
 # BoVW search route
 @app.route("/bovw-search", methods=["POST"])
-def bovw_search(): 
+def bovw(): 
     if request.method == "POST":
 
         RESULTS_ARRAY = []
@@ -137,7 +103,7 @@ def bovw_search():
 
 
 @app.route("/cnn-search", methods=["POST"])
-def cnn_search():
+def cnn():
     if request.method == "POST":
         RESULTS_ARRAY = []
         filestr = request.files["img"].read()
@@ -173,9 +139,49 @@ def cnn_search():
 
             return jsonify(results=RESULTS_ARRAY[:10])
         except:
-            jsonify({"sorry": "Sorry, no results! Please try again."}), 500
-            
+            jsonify({"sorry": "Sorry, no results! Please try again."}), 500            
 
+def basic_search(filestr):
+
+    RESULTS_ARRAY = []
+
+    try:
+
+        # Initialize the colordescriptor
+        colorDescriptor = ColorDescriptor((8, 12, 3))
+
+        # Load querry image and describe it
+        import cv2
+
+        npimg = np.frombuffer(filestr, np.uint8)
+
+        # Query image is already in BGR
+        query = cv2.imdecode(npimg, -1)
+
+        features = colorDescriptor.describe(query)
+
+
+        # Perform search
+        searcher = SearcherSimple(INDEX_SIMPLE)
+        results  = searcher.search(features)
+
+        # Loop over the results and displaying score and image name
+        for (score, resultID) in results:
+            RESULTS_ARRAY.append(
+                {"image": str(resultID), "score": str(score)}
+                )
+
+
+        return jsonify(results=RESULTS_ARRAY[:10])
+
+    except Exception as inst:
+
+        print(inst)
+
+        # Return error
+        return jsonify({"sorry": "Sorry, no results! Please try again."}), 500
+            
+            
 # Run!
 if __name__ == "__main__":
     app.run(host="0.0.0.0", debug=True)

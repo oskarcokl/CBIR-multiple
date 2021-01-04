@@ -48,7 +48,7 @@ function queryImage(event) {
 
     $.ajax({
         type: "POST",
-        url: "/all-search",
+        url: endpoint,
         data: formData,
 	contentType: false,
         processData: false,
