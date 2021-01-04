@@ -47,59 +47,17 @@ def all_search():
 @app.route("/simple-search", methods=["POST"])
 def basic():
     if request.method == "POST":
-
         filestr = request.files["img"].read()
-
         return basic_search(filestr);
         
         
-
-
 # BoVW search route
 @app.route("/bovw-search", methods=["POST"])
 def bovw(): 
-    if request.method == "POST":
-
-        RESULTS_ARRAY = []
-        
+    if request.method == "POST": 
         filestr = request.files["img"].read()
+        return bovw_search(filestr)
 
-        try:
-
-            # Initialize the colordescriptor
-            siftDescriptor = SiftDescriptor()
-            histogramBuilder = HistogramBuilder()
-            searcher = SearcherBovw(INDEX_BOVW)
-
-            # Load querry image and describe it
-            import cv2
-
-            npimg = np.frombuffer(filestr, np.uint8)
-            # Query image is already in BGR
-            query_image = cv2.imdecode(npimg, -1)
-            query_image_grayscale = cv2.cvtColor(query_image, cv2.COLOR_BGR2GRAY)
-            descriptors = siftDescriptor.describe(query_image_grayscale) 
-            clusters = load(CLUSTER)
-            
-            query_histogram = histogramBuilder.build_histogram_from_clusters(descriptors, clusters)
-
-            
-            (distances, image_ids) = searcher.search(query_histogram, 10)
-
-            # Loop over the results and displaying score and image name
-            for i in range(len(image_ids)):
-                RESULTS_ARRAY.append(
-                    {"image": str(image_ids[i]), "score": str(distances[i])}
-                    )
-
-
-            return jsonify(results=RESULTS_ARRAY[:10])
-
-        except Exception as inst:
-            print(inst)
-            
-            # Return error
-            jsonify({"sorry": "Sorry, no results! Please try again."}), 500
 
 
 @app.route("/cnn-search", methods=["POST"])
@@ -141,8 +99,45 @@ def cnn():
         except:
             jsonify({"sorry": "Sorry, no results! Please try again."}), 500            
 
-def basic_search(filestr):
+def bovw_search(filestr): 
+    RESULTS_ARRAY = []
+    try:
+        # Initialize the colordescriptor
+        siftDescriptor = SiftDescriptor()
+        histogramBuilder = HistogramBuilder()
+        searcher = SearcherBovw(INDEX_BOVW)
 
+        # Load querry image and describe it
+        import cv2
+
+        npimg = np.frombuffer(filestr, np.uint8)
+        # Query image is already in BGR
+        query_image = cv2.imdecode(npimg, -1)
+        query_image_grayscale = cv2.cvtColor(query_image, cv2.COLOR_BGR2GRAY)
+        descriptors = siftDescriptor.describe(query_image_grayscale) 
+        clusters = load(CLUSTER)
+
+        query_histogram = histogramBuilder.build_histogram_from_clusters(descriptors, clusters)
+
+
+        (distances, image_ids) = searcher.search(query_histogram, 10)
+
+        # Loop over the results and displaying score and image name
+        for i in range(len(image_ids)):
+            RESULTS_ARRAY.append(
+                {"image": str(image_ids[i]), "score": str(distances[i])}
+                )
+
+
+        return jsonify(results=RESULTS_ARRAY[:10])
+
+    except Exception as inst:
+        print(inst)
+
+        # Return error
+        return jsonify({"sorry": "Sorry, no results! Please try again."}), 500
+            
+def basic_search(filestr):
     RESULTS_ARRAY = []
 
     try:
