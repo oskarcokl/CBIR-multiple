@@ -25,7 +25,11 @@ app = Flask(__name__)
 INDEX_SIMPLE = os.path.join(os.path.dirname(__file__), "./simple_color_search/index.csv")
 INDEX_BOVW = os.path.join(os.path.dirname(__file__), "./bovw_sift/index_all.csv")
 INDEX_CNN = os.path.join(os.path.dirname(__file__), "./cnn/index.csv")
-CLUSTER=os.path.join(os.path.dirname(__file__), "./bovw_sift/train_k_means.joblib")
+CLUSTER = os.path.join(os.path.dirname(__file__), "./bovw_sift/train_k_means.joblib")
+
+KNN_CNN = os.path.join(os.path.dirname(__file__), "./cnn/kmeans_model.joblib")
+
+STATIC = os.path.join(os.path.dirname(__file__), "./static/images/")
 
 
 # Main route
@@ -52,10 +56,7 @@ def all_search():
         print("Searching cnn")
         RESULTS_ARRAY_JSON.append(cnn_search(filestr))
         print("Done cnn")
-        print("Done searching")
-
-        
-        print(RESULTS_ARRAY_JSON)
+        print("Done searching")        
 
         return jsonify(basic=RESULTS_ARRAY_JSON[0],
                        bovw=RESULTS_ARRAY_JSON[1],
@@ -87,6 +88,27 @@ def cnn():
         RESULTS_ARRAY =  cnn_search(filestr)
         return jsonify(results=RESULTS_ARRAY)
 
+# filestr is array of image strings
+def cnn_index(filestr):
+    if os.path.isfile(KNN_CNN):
+        kmeans_model = load(KNN_CNN)
+    else:
+        print("No k_means file found")
+        return False
+
+    index_file = open(INDEX_CNN, "w")
+    feature_list = []
+
+    
+    
+
+
+def bovw_index():
+    pass
+
+def basic_index():
+    pass
+    
 
 def cnn_search(filestr): 
     RESULTS_ARRAY = []
