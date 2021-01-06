@@ -19,11 +19,8 @@ const init = () => {
     
     // Setting the event listeners.
     document.querySelector("#queryImage").addEventListener("change", queryImage);
+    document.querySelector("#indexImages").addEventListener("change", sendImageForIndex);
     document.querySelector("#clearResultsBtn").addEventListener("click",removeResults);
-    // algorithmSelectElement.addEventListener("change", function (event) {
-    //     algorithm = event.target.value;
-    //     console.log(algorithm);
-    // })
 }
 
 function queryImage(event) {
@@ -63,6 +60,32 @@ function queryImage(event) {
             console.log(error);
         }
     });
+}
+
+function sendImageForIndex() {
+    const formData = new FormData();
+
+    for (let i = 0; i < this.files.length; i++) {
+	formData.append("img_"+i, this.files[i]);
+    }
+
+    
+    console.log(formData);
+    const url = "/all-index";
+
+    fetch(url, {
+	method: "POST",
+	body: formData
+    })
+	.then (response => {
+	    console.log(response);
+	})
+	.then (success => {
+	    console.log(success);
+	})
+	.catch (err => {
+	    console.log(err);
+	});
 }
 
 function removeResults() { 

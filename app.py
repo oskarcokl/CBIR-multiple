@@ -9,6 +9,7 @@ from tensorflow import keras
 from tensorflow.keras.applications.vgg16 import VGG16
 from tensorflow.keras.applications.vgg16 import preprocess_input
 from tensorflow.keras.preprocessing import image
+import cv2
 
 from simple_color_search.colordescriptor  import ColorDescriptor
 from simple_color_search.searcher import Searcher as SearcherSimple
@@ -28,6 +29,7 @@ INDEX_CNN = os.path.join(os.path.dirname(__file__), "./cnn/index.csv")
 CLUSTER = os.path.join(os.path.dirname(__file__), "./bovw_sift/train_k_means.joblib")
 
 KNN_CNN = os.path.join(os.path.dirname(__file__), "./cnn/kmeans_model.joblib")
+VGG16_CNN = os.path.join(os.path.dirname(__file__), "./cnn/vgg16")
 
 STATIC = os.path.join(os.path.dirname(__file__), "./static/images/")
 
@@ -88,22 +90,68 @@ def cnn():
         RESULTS_ARRAY =  cnn_search(filestr)
         return jsonify(results=RESULTS_ARRAY)
 
+# @app.route("/cnn-index", methods=["POST"])
+# def cnn_index():
+#     if request.method == "POST":
+#         filestr = request.files["img"].read()
+
+#====== INDEX =========#
+@app.route("/all-index", methods=["POST"])
+def all_index():
+    if request.method == "POST":
+
+        images = request.files
+        
+        _cnn_index(images)
+        
+        # for key in images:
+        #     print(key)
+        #     print(images[key].filename)
+
+        return ""
+        
 # filestr is array of image strings
-def cnn_index(filestr):
-    if os.path.isfile(KNN_CNN):
-        kmeans_model = load(KNN_CNN)
+def _cnn_index(images):
+    if os.path.isdir(VGG16_CNN):
+        model = keras.models.load_model(VGG16_CNN)
+        print("Loading local vgg16")
     else:
-        print("No k_means file found")
-        return False
+        model = VGG16(weights="imagenet", include_top=False)
+        print("Downloading vgg16")
 
-    index_file = open(INDEX_CNN, "w")
-    feature_list = []
 
-    
-    
+    index_file = open(INDEX_CNN, "w")  
+
+    for key in images:
+        img = images[key]
+        img_name = img.filename
+        img_path = os.path.join(STATIC, img_name)
+
+        img_str = img.stream.read()
+        print(img_str)
+        img_np = np.frombuffer(img_str, np.uint8)
+        print(img_np)
+        index_img = cv2.imdecode(img_np, -1)
+        resized_index_img = cv2.resize(index_img, (244, 244))
+        img_array = np.expand_dims(resized_index_img, axis=0)
+        img_array = preprocess_input(img_array)
+
+        features = model.predict(img_array)
+        features_numpy = np.array(features)
+
+        #save file to static/images
+        img.save(img_path);
+
+        write_to_index(features_numpy.flatten(), img_name, index_file)
+
+    index_file.close()
+    return
 
 
 def bovw_index():
+
+
+    index_file = open(INDEX_CNN, "w")  
     pass
 
 def basic_index():
@@ -223,7 +271,9 @@ def basic_search(filestr):
         # Return error
         return jsonify({"sorry": "Sorry, no results! Please try again."}), 500
             
-            
+def write_to_index(features, imageID, indexFile):
+    indexFile.write("%s,%s\n" % (imageID, ",".join(features.astype(str))))
+    
 # Run!
 if __name__ == "__main__":
     app.run(host="0.0.0.0", debug=True)
