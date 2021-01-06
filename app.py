@@ -120,7 +120,7 @@ def _cnn_index(images):
         print("Downloading vgg16")
 
 
-    index_file = open(INDEX_CNN, "w")  
+    index_file = open(INDEX_CNN, "a")  
 
     for key in images:
         img = images[key]
