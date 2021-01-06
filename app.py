@@ -102,8 +102,10 @@ def all_index():
 
         images = request.files
         
-        _cnn_index(images)
+        #_cnn_index(images)
         #_bovw_index(images)
+        _basic_index(images)
+
         
         # for key in images:
         #     print(key)
@@ -180,8 +182,28 @@ def _bovw_index(images):
 
     
 
-def _basic_index():
-    pass
+def _basic_index(images):
+    index_file = open(INDEX_SIMPLE, "a")
+
+    colorDescriptor = ColorDescriptor((8, 12, 3))
+    
+    for key in images:
+        img = images[key]
+        img_name = img.filename
+        img_path = os.path.join(STATIC, img_name)
+        img.save(img_path)
+
+        img = cv2.imread(img_path)
+        features = colorDescriptor.describe(img)
+        features_array = np.array(features)
+        
+        write_to_index(features_array, img_name, index_file)
+
+    index_file.close()
+    return
+
+
+
     
 
 def cnn_search(filestr): 
