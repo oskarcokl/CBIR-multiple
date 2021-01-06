@@ -102,7 +102,8 @@ def all_index():
 
         images = request.files
         
-        _cnn_index(images)
+        #_cnn_index(images)
+        _bovw_index(images)
         
         # for key in images:
         #     print(key)
@@ -148,13 +149,41 @@ def _cnn_index(images):
     return
 
 
-def bovw_index():
+def _bovw_index(images):
+    if os.path.isfile(CLUSTER):
+        clusters = load(CLUSTER)
+    else:
+        return jsonify({"message": "Didn't findt local clusters"}, 500);
 
+    index_file = open(INDEX_BOVW, "a")
+    histogramBuilder = HistogramBuilder()
+    siftDescriptor = SiftDescriptor()
 
-    index_file = open(INDEX_CNN, "w")  
-    pass
+    for key in images:
+        img = images[key]
+        img_name = img.filename
+        img_path = os.path.join(STATIC, img_name)
 
-def basic_index():
+        img_str = img.stream.read()
+        img_np = np.frombuffer(img_str, np.uint8)
+        index_img = cv2.imdecode(img_np, -1)
+        index_img_grayscale = cv2.cvtColor(index_img, cv2.COLOR_BGR2GRAY)
+        
+        descriptors = siftDescriptor.describe(index_img_grayscale) 
+        index_histogram = histogramBuilder.build_histogram_from_clusters(descriptors, clusters)
+
+        #save file to static/images
+        img.save(img_path);
+        
+        write_to_index(index_histogram, img_name, index_file)
+
+    index_file.close()
+    return
+        
+
+    
+
+def _basic_index():
     pass
     
 
