@@ -102,8 +102,8 @@ def all_index():
 
         images = request.files
         
-        #_cnn_index(images)
-        _bovw_index(images)
+        _cnn_index(images)
+        #_bovw_index(images)
         
         # for key in images:
         #     print(key)
@@ -128,20 +128,18 @@ def _cnn_index(images):
         img_name = img.filename
         img_path = os.path.join(STATIC, img_name)
 
-        img_str = img.stream.read()
-        print(img_str)
-        img_np = np.frombuffer(img_str, np.uint8)
-        print(img_np)
-        index_img = cv2.imdecode(img_np, -1)
-        resized_index_img = cv2.resize(index_img, (244, 244))
-        img_array = np.expand_dims(resized_index_img, axis=0)
+        img.save(img_path)
+
+        
+        img = image.load_img(img_path, target_size=(244, 244))
+        img_array = image.img_to_array(img)
+        img_array = np.expand_dims(img_array, axis=0)
         img_array = preprocess_input(img_array)
 
         features = model.predict(img_array)
         features_numpy = np.array(features)
 
         #save file to static/images
-        img.save(img_path);
 
         write_to_index(features_numpy.flatten(), img_name, index_file)
 
@@ -163,17 +161,16 @@ def _bovw_index(images):
         img = images[key]
         img_name = img.filename
         img_path = os.path.join(STATIC, img_name)
+        img.save(img_path)
 
-        img_str = img.stream.read()
-        img_np = np.frombuffer(img_str, np.uint8)
-        index_img = cv2.imdecode(img_np, -1)
-        index_img_grayscale = cv2.cvtColor(index_img, cv2.COLOR_BGR2GRAY)
+        # img_str = img.stream.read()
+        # img_np = np.frombuffer(img_str, np.uint8)
+        index_img_grayscale = cv2.imread(img_path, 0)
         
         descriptors = siftDescriptor.describe(index_img_grayscale) 
         index_histogram = histogramBuilder.build_histogram_from_clusters(descriptors, clusters)
 
         #save file to static/images
-        img.save(img_path);
         
         write_to_index(index_histogram, img_name, index_file)
 
