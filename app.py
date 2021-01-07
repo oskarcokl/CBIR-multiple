@@ -10,6 +10,7 @@ from tensorflow.keras.applications.vgg16 import VGG16
 from tensorflow.keras.applications.vgg16 import preprocess_input
 from tensorflow.keras.preprocessing import image
 import cv2
+import json
 
 from simple_color_search.colordescriptor  import ColorDescriptor
 from simple_color_search.searcher import Searcher as SearcherSimple
@@ -102,6 +103,8 @@ def cnn():
         results_cnn = RESULTS_ARRAY
         return jsonify(results=RESULTS_ARRAY)
 
+
+    
 
 #====== INDEX =========#
 @app.route("/all-index", methods=["POST"])
@@ -207,6 +210,31 @@ def _basic_index(images):
     return
 
 #==== ROCCHIO ====#
+
+
+@app.route("/all-rocchio", methods=["POST"])
+def rocchio():
+    if request.method == "POST":
+
+        data = request.json
+
+        relevant_basic = data["relevant_basic"]
+        nonrelevant_basic = data["nonrelevant_basic"]
+        relevant_bovw = data["relevant_bovw"]
+        nonrelevant_bovw = data["nonrelevant_bovw"]
+        relevant_cnn = data["relevant_cnn"]
+        nonrelevant_cnn = data["nonrelevant_cnn"]
+
+        print(nonrelevant_basic)
+        print(relevant_basic)
+        print(nonrelevant_bovw)
+        print(relevant_bovw)
+        print(nonrelevant_cnn)
+        print(relevant_cnn)
+
+
+        return ""
+        
 
 def _basic_rocchio(relevant_imgs, nonrelevant_imgs):
     

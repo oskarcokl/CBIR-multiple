@@ -21,6 +21,9 @@ const init = () => {
     document.querySelector("#queryImage").addEventListener("change", queryImage);
     document.querySelector("#indexImages").addEventListener("change", sendImageForIndex);
     document.querySelector("#clearResultsBtn").addEventListener("click",removeResults);
+    document.querySelector("#searchRocchio").addEventListener("click",querryWithRocchio);
+
+
 }
 
 function queryImage(event) {
@@ -158,7 +161,6 @@ function styleResultsAndShow(data, id) {
 
 function markImage(event) {
     const image = event.target;
-    console.log(image);
 
     if (image.classList.contains("relevant-img")) {
 	removeStylesFromMarkedImg(image);
@@ -167,9 +169,86 @@ function markImage(event) {
     }
 }
 
-function reQuerryWithRocchio() {
-    console.log("You are using Rocchio.")
+function querryWithRocchio() {
+    results_basic = document.querySelector("#results-basic").querySelectorAll("img");
+    results_bovw = document.querySelector("#results-bovw").querySelectorAll("img");
+    results_cnn = document.querySelector("#results-cnn").querySelectorAll("img");
+
+    const url = "/all-rocchio";
+
+    const relevant_basic = getRelevantResults(results_basic);
+    const nonrelevant_basic = getNonRelevantResults(results_basic);
+    const relevant_bovw = getRelevantResults(results_bovw);
+    const nonrelevant_bovw = getNonRelevantResults(results_bovw);
+    const relevant_cnn = getRelevantResults(results_cnn);
+    const nonrelevant_cnn = getNonRelevantResults(results_cnn);
+
+
+
+    // console.log(relevant_basic);
+    // console.log(nonrelevant_basic);
+    // console.log(relevant_bovw);
+    // console.log(nonrelevant_bovw);
+    // console.log(relevant_cnn);
+    // console.log(nonrelevant_cnn);
+
+    data = {
+	"relevant_basic": relevant_basic,
+	"nonrelevant_basic": nonrelevant_basic,
+	"relevant_bovw": relevant_bovw,
+	"nonrelevant_bovw": nonrelevant_bovw,
+	"relevant_cnn": relevant_cnn,
+	"nonrelevant_cnn": nonrelevant_cnn,
+    };
+
+    console.log(data);
+
+    fetch(url, {
+	method: "POST",
+	body: JSON.stringify(data),
+	headers: {
+		'Content-type': 'application/json; charset=UTF-8'
+	}
+    })
+	.then (response => {
+	    console.log(response);
+	})
+	.then (success => {
+	    console.log(success);
+	})
+	.catch (err => {
+	    console.log(err);
+	});
+
 }
+
+
+function getRelevantResults(results) {
+    relevantResults = [];
+    for (let i = 0; i < results.length; i++) {
+	let img = results[i]
+	if (img.classList.contains("relevant-img")) {
+	    let img_str_array = img.src.split("/")
+	    let img_name = img_str_array[img_str_array.length-1]
+	    relevantResults.push(img_name);
+	}
+    }
+    return relevantResults;
+}
+
+function getNonRelevantResults(results) {
+    nonRelevantResults = [];
+    for (let i = 0; i < results.length; i++) {
+	let img = results[i]
+	if (!img.classList.contains("relevant-img")) {
+	    let img_str_array = img.src.split("/")
+	    let img_name = img_str_array[img_str_array.length-1]
+	    nonRelevantResults.push(img_name);
+	}
+    }
+    return nonRelevantResults;
+}
+
 
 function addStylesToMarkedImg(image) {
     image.classList.add("border")
