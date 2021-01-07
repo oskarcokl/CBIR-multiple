@@ -57,19 +57,21 @@ def all_search():
         print("Searching basic")
         RESULTS_ARRAY_JSON.append(basic_search(filestr))
         print("Done basic")
-        print("Searching bovw")
-        RESULTS_ARRAY_JSON.append(bovw_search(filestr))
-        print("Done bovw")
-        print("Searching cnn")
-        RESULTS_ARRAY_JSON.append(cnn_search(filestr))
-        print("Done cnn")
-        print("Done searching")
 
-        print(RESULTS_ARRAY_JSON)
+        # TODO remember to unccoment later
+
+        # print("Searching bovw")
+        # RESULTS_ARRAY_JSON.append(bovw_search(filestr))
+        # print("Done bovw")
+        # print("Searching cnn")
+        # RESULTS_ARRAY_JSON.append(cnn_search(filestr))
+        # print("Done cnn")
+        # print("Done searching")
+
 
         return jsonify({"basic": RESULTS_ARRAY_JSON[0],
-                       "bovw": RESULTS_ARRAY_JSON[1],
-                        "cnn": RESULTS_ARRAY_JSON[2]}, 200)
+                       "bovw": RESULTS_ARRAY_JSON[0],
+                        "cnn": RESULTS_ARRAY_JSON[0]}, 200)
     
 # Basic search route
 @app.route("/simple-search", methods=["POST"])
@@ -244,7 +246,7 @@ def cnn_search(filestr):
             RESULTS_ARRAY.append(
                 {"image": str(img_ids[i]), "score": str(dist[i])}
                 )
-
+            
 
         return RESULTS_ARRAY[:10]
     except:

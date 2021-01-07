@@ -143,6 +143,9 @@ function styleResultsAndShow(data, id) {
 	resultImg.style.width = "300px";
 	resultImg.style.height = "300px";
 
+	// Add class for marking for rocchio
+	resultImg.addEventListener("click", markImage);
+
 
 	thImage.append(resultImg);
 
@@ -151,6 +154,36 @@ function styleResultsAndShow(data, id) {
 	document.querySelector(id).append(tr);
     };
 
+}
+
+function markImage(event) {
+    const image = event.target;
+    console.log(image);
+
+    if (image.classList.contains("relevant-img")) {
+	removeStylesFromMarkedImg(image);
+    } else { 
+	addStylesToMarkedImg(image);
+    }
+}
+
+function reQuerryWithRocchio() {
+    console.log("You are using Rocchio.")
+}
+
+function addStylesToMarkedImg(image) {
+    image.classList.add("border")
+    image.classList.add("border-info")
+    image.classList.add("border-5")
+    image.classList.add("relevant-img")
+}
+
+
+function removeStylesFromMarkedImg(image) {
+    image.classList.remove("border")
+    image.classList.remove("border-info")
+    image.classList.remove("border-5")
+    image.classList.remove("relevant-img")
 }
 
 
