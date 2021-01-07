@@ -34,6 +34,11 @@ VGG16_CNN = os.path.join(os.path.dirname(__file__), "./cnn/vgg16")
 STATIC = os.path.join(os.path.dirname(__file__), "./static/images/")
 
 
+results_bovw = []
+results_cnn = []
+results_simple = []
+
+
 # Main route
 @app.route("/")
 def index():
@@ -70,6 +75,7 @@ def basic():
     if request.method == "POST":
         filestr = request.files["img"].read()
         RESULTS_ARRAY = basic_search(filestr);
+        results_simple = RESULTS_ARRAY
         return jsonify(results=RESULTS_ARRAY)
         
         
@@ -79,6 +85,7 @@ def bovw():
     if request.method == "POST": 
         filestr = request.files["img"].read()
         RESULTS_ARRAY = bovw_search(filestr)
+        results_bovw = RESULTS_ARRAY
         return jsonify(results=RESULTS_ARRAY)
 
 
@@ -88,30 +95,26 @@ def cnn():
     if request.method == "POST":
         filestr = request.files["img"].read()
         RESULTS_ARRAY =  cnn_search(filestr)
+        results_cnn = RESULTS_ARRAY
         return jsonify(results=RESULTS_ARRAY)
 
-# @app.route("/cnn-index", methods=["POST"])
-# def cnn_index():
-#     if request.method == "POST":
-#         filestr = request.files["img"].read()
 
 #====== INDEX =========#
 @app.route("/all-index", methods=["POST"])
 def all_index():
     if request.method == "POST":
+        try: 
+            images = request.files
 
-        images = request.files
+            # Currentyl saving with every call. Might change later.
+            _cnn_index(images)
+            _bovw_index(images)
+            _basic_index(images)        
+
+            return jsonify({"message": "Files index successfully."}, 200)
         
-        #_cnn_index(images)
-        #_bovw_index(images)
-        _basic_index(images)
-
-        
-        # for key in images:
-        #     print(key)
-        #     print(images[key].filename)
-
-        return ""
+        except:  
+            return jsonify({"message": "Something went wrong."}, 500)
         
 # filestr is array of image strings
 def _cnn_index(images):
@@ -179,9 +182,6 @@ def _bovw_index(images):
     index_file.close()
     return
         
-
-    
-
 def _basic_index(images):
     index_file = open(INDEX_SIMPLE, "a")
 
@@ -202,10 +202,20 @@ def _basic_index(images):
     index_file.close()
     return
 
+#==== ROCCHIO ====#
 
-
+def _basic_rocchio(relevant_imgs, nonrelevant_imgs):
     
+    pass
 
+def _cnn_rocchio():
+    pass
+
+def _bovw_rocchio():
+    pass
+
+#==== SEARCH ====#
+    
 def cnn_search(filestr): 
     RESULTS_ARRAY = []
     try:
@@ -318,7 +328,9 @@ def basic_search(filestr):
 
         # Return error
         return jsonify({"sorry": "Sorry, no results! Please try again."}), 500
-            
+
+#==== HELPER FUNCTIONS ====#    
+    
 def write_to_index(features, imageID, indexFile):
     indexFile.write("%s,%s\n" % (imageID, ",".join(features.astype(str))))
     
