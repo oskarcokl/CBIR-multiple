@@ -63,11 +63,13 @@ def all_search():
         print("Searching cnn")
         RESULTS_ARRAY_JSON.append(cnn_search(filestr))
         print("Done cnn")
-        print("Done searching")        
+        print("Done searching")
 
-        return jsonify(basic=RESULTS_ARRAY_JSON[0],
-                       bovw=RESULTS_ARRAY_JSON[1],
-                       cnn=RESULTS_ARRAY_JSON[2])
+        print(RESULTS_ARRAY_JSON)
+
+        return jsonify({"basic": RESULTS_ARRAY_JSON[0],
+                       "bovw": RESULTS_ARRAY_JSON[1],
+                        "cnn": RESULTS_ARRAY_JSON[2]}, 200)
     
 # Basic search route
 @app.route("/simple-search", methods=["POST"])
@@ -235,10 +237,7 @@ def cnn_search(filestr):
         query_features = model.predict(img_array)
         features_numpy = np.array(query_features)
 
-        print("Hello")
-
         (dist, img_ids) = searcher.search(features_numpy.flatten(), 10)
-        print("Yo this hist works")
 
 
         for i in range(len(img_ids)):

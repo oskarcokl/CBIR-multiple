@@ -96,11 +96,11 @@ function removeResults() {
 }
 
 function displayResultsAll(result) {
-    console.log(result);
+    console.log(result[0]);
     $("#results-table").show();
-    styleResultsAndShow(result.basic, "#results-basic");
-    styleResultsAndShow(result.bovw, "#results-bovw");
-    styleResultsAndShow(result.cnn, "#results-cnn");
+    styleResultsAndShow(result[0].basic, "#results-basic");
+    styleResultsAndShow(result[0].bovw, "#results-bovw");
+    styleResultsAndShow(result[0].cnn, "#results-cnn");
     handleSearching(false);
     enableImageUpload();
 }
@@ -133,6 +133,7 @@ function displayResults(result) {
 }
 
 function styleResultsAndShow(data, id) {
+    console.log(data);
     for (i = 0; i < data.length; i++) {
 	let tr = document.createElement("tr");
 	let thImage = document.createElement("th");
