@@ -3,6 +3,7 @@ import os
 from flask import Flask, render_template, request, jsonify
 
 import numpy as np
+import csv
 from joblib import load
 import tensorflow as tf
 from tensorflow import keras
@@ -38,6 +39,9 @@ STATIC = os.path.join(os.path.dirname(__file__), "./static/images/")
 results_bovw = []
 results_cnn = []
 results_simple = []
+curr_query_bovw = []
+curr_query_cnn = []
+global curr_query_simple
 
 
 # Main route
@@ -73,6 +77,33 @@ def all_search():
         return jsonify({"basic": RESULTS_ARRAY_JSON[0],
                        "bovw": RESULTS_ARRAY_JSON[0],
                         "cnn": RESULTS_ARRAY_JSON[0]}, 200)
+
+
+def _all_search(query_basic):
+
+    # Can reach the endpoint
+    print("You are searching with all of the algorythms.")
+    RESULTS_ARRAY_JSON = []
+
+    print("Searching basic")
+    RESULTS_ARRAY_JSON.append(basic_search_query(query_basic))
+    print("Done basic")
+
+    # TODO remember to unccoment later
+
+    # print("Searching bovw")
+    # RESULTS_ARRAY_JSON.append(bovw_search(filestr))
+    # print("Done bovw")
+    # print("Searching cnn")
+    # RESULTS_ARRAY_JSON.append(cnn_search(filestr))
+    # print("Done cnn")
+    # print("Done searching")
+
+
+    return jsonify({"basic": RESULTS_ARRAY_JSON[0],
+                    "bovw": RESULTS_ARRAY_JSON[0],
+                    "cnn": RESULTS_ARRAY_JSON[0]}, 200)
+
     
 # Basic search route
 @app.route("/simple-search", methods=["POST"])
@@ -225,26 +256,47 @@ def rocchio():
         relevant_cnn = data["relevant_cnn"]
         nonrelevant_cnn = data["nonrelevant_cnn"]
 
-        print(nonrelevant_basic)
-        print(relevant_basic)
-        print(nonrelevant_bovw)
-        print(relevant_bovw)
-        print(nonrelevant_cnn)
-        print(relevant_cnn)
+        global curr_query_simple
+        
+        basic_query = _basic_rocchio(relevant_basic, nonrelevant_basic)
 
-
-        return ""
+        
+        
+        print("searching_again")
+        return _all_search(basic_query)
         
 
-def _basic_rocchio(relevant_imgs, nonrelevant_imgs):
+def _basic_rocchio(relevant_imgs, nonrelevant_imgs, a=1, b=0.75, c=0.15):
+    relevant_features = load_features(relevant_imgs, INDEX_SIMPLE)
+    nonrelevant_features = load_features(nonrelevant_imgs, INDEX_SIMPLE)
+
+
+
+
+
+    global curr_query_simple
+    query_array = np.array(curr_query_simple)
     
-    pass
+    query_part = query_array * a
+    
+    sum_relevant = sum_vectors(relevant_features)
+    relevant_part = b * (1 / len(relevant_features)) * sum_relevant
+
+    sum_nonrelevant = sum_vectors(nonrelevant_features)
+    nonrelevant_part = c * (1 / len(nonrelevant_features)) * sum_nonrelevant
+
+    new_query = np.subtract(np.add(query_part, relevant_part), nonrelevant_part)
+    return new_query
+
 
 def _cnn_rocchio():
     pass
 
+
 def _bovw_rocchio():
     pass
+
+
 
 #==== SEARCH ====#
     
@@ -266,8 +318,9 @@ def cnn_search(filestr):
 
         query_features = model.predict(img_array)
         features_numpy = np.array(query_features)
+        curr_query_cnn = features_numpy.flatten()
 
-        (dist, img_ids) = searcher.search(features_numpy.flatten(), 10)
+        (dist, img_ids) = searcher.search(curr_query_cnn, 10)
 
 
         for i in range(len(img_ids)):
@@ -300,6 +353,8 @@ def bovw_search(filestr):
         clusters = load(CLUSTER)
 
         query_histogram = histogramBuilder.build_histogram_from_clusters(descriptors, clusters)
+        curr_query_bovw = query_histogram
+        
 
 
         (distances, image_ids) = searcher.search(query_histogram, 10)
@@ -336,6 +391,8 @@ def basic_search(filestr):
         query = cv2.imdecode(npimg, -1)
 
         features = colorDescriptor.describe(query)
+        global curr_query_simple
+        curr_query_simple = features
 
 
         # Perform search
@@ -358,11 +415,64 @@ def basic_search(filestr):
         # Return error
         return jsonify({"sorry": "Sorry, no results! Please try again."}), 500
 
+#==== SEARCH FUNCTIONS QUERY INPUT ====#
+
+def basic_search_query(query_features):
+    RESULTS_ARRAY = []
+
+    try:
+        global curr_query_simple
+        curr_query_simple = query_features
+
+        # Perform search
+        searcher = SearcherSimple(INDEX_SIMPLE)
+        results  = searcher.search(query_features)
+
+        # Loop over the results and displaying score and image name
+        for (score, resultID) in results:
+            RESULTS_ARRAY.append(
+                {"image": str(resultID), "score": str(score)}
+                )
+        return RESULTS_ARRAY[:10]
+
+    except Exception as inst:
+
+        print(inst)
+
+        # Return error
+        return jsonify({"sorry": "Sorry, no results! Please try again."}), 500
+
+    
 #==== HELPER FUNCTIONS ====#    
     
 def write_to_index(features, imageID, indexFile):
     indexFile.write("%s,%s\n" % (imageID, ",".join(features.astype(str))))
-    
+
+def load_features(img_ids, index_path):
+    n_vectors = len(img_ids)
+    features = []
+
+    with open(index_path, mode="r") as index_file:
+        csv_reader = csv.reader(index_file, delimiter=",")
+
+        vector_count = 0
+        for row in csv_reader:
+            for img_id in img_ids:
+                if row[0] == img_id: 
+                    feature_vector = row[1:]
+                    features.append(feature_vector)
+                    vector_count += 1
+
+                if vector_count == n_vectors:
+                    return np.array(features).astype(np.float)
+
+def sum_vectors(vectors):
+    _sum = np.array(vectors[0])
+    for i in range(1, len(vectors)):
+        _sum = np.add(_sum, vectors[i])
+    return _sum
+        
+                
 # Run!
 if __name__ == "__main__":
     app.run(host="0.0.0.0", debug=True)

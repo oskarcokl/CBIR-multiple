@@ -41,8 +41,6 @@ function queryImage(event) {
 
     console.log("Using", algorithm);
     handleSearching(true);
-
-
     removeResults();
     disableImageUpload();
     displayQueryImage(image);
@@ -99,7 +97,6 @@ function removeResults() {
 }
 
 function displayResultsAll(result) {
-    console.log(result[0]);
     $("#results-table").show();
     styleResultsAndShow(result[0].basic, "#results-basic");
     styleResultsAndShow(result[0].bovw, "#results-bovw");
@@ -183,6 +180,8 @@ function querryWithRocchio() {
     const relevant_cnn = getRelevantResults(results_cnn);
     const nonrelevant_cnn = getNonRelevantResults(results_cnn);
 
+    removeResults();
+    handleSearching(true);
 
 
     // console.log(relevant_basic);
@@ -211,10 +210,15 @@ function querryWithRocchio() {
 	}
     })
 	.then (response => {
-	    console.log(response);
-	})
-	.then (success => {
-	    console.log(success);
+	    if (response.status !== 200) {
+		console.log('Looks like there was a problem. Status Code: ' + response.status);
+		return;
+	    }
+
+	    response.json().then(function(data) {
+		displayResultsAll(data)
+		handleSearching(false);
+	    })
 	})
 	.catch (err => {
 	    console.log(err);
