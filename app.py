@@ -63,23 +63,22 @@ def all_search():
         RESULTS_ARRAY_JSON.append(basic_search(filestr))
         print("Done basic")
 
-        # TODO remember to unccoment later
 
-        # print("Searching bovw")
-        # RESULTS_ARRAY_JSON.append(bovw_search(filestr))
-        # print("Done bovw")
-        # print("Searching cnn")
-        # RESULTS_ARRAY_JSON.append(cnn_search(filestr))
-        # print("Done cnn")
-        # print("Done searching")
+        print("Searching bovw")
+        RESULTS_ARRAY_JSON.append(bovw_search(filestr))
+        print("Done bovw")
+        print("Searching cnn")
+        RESULTS_ARRAY_JSON.append(cnn_search(filestr))
+        print("Done cnn")
+        print("Done searching")
 
 
         return jsonify({"basic": RESULTS_ARRAY_JSON[0],
-                       "bovw": RESULTS_ARRAY_JSON[0],
-                        "cnn": RESULTS_ARRAY_JSON[0]}, 200)
+                       "bovw": RESULTS_ARRAY_JSON[1],
+                        "cnn": RESULTS_ARRAY_JSON[2]}, 200)
 
 
-def _all_search(query_basic):
+def _all_search(query_basic, query_bovw, query_cnn):
 
     # Can reach the endpoint
     print("You are searching with all of the algorythms.")
@@ -91,18 +90,18 @@ def _all_search(query_basic):
 
     # TODO remember to unccoment later
 
-    # print("Searching bovw")
-    # RESULTS_ARRAY_JSON.append(bovw_search(filestr))
-    # print("Done bovw")
-    # print("Searching cnn")
-    # RESULTS_ARRAY_JSON.append(cnn_search(filestr))
-    # print("Done cnn")
-    # print("Done searching")
+    print("Searching bovw")
+    RESULTS_ARRAY_JSON.append(bovw_search_query(query_bovw))
+    print("Done bovw")
+    print("Searching cnn")
+    RESULTS_ARRAY_JSON.append(cnn_search_query(query_cnn))
+    print("Done cnn")
+    print("Done searching")
 
 
     return jsonify({"basic": RESULTS_ARRAY_JSON[0],
-                    "bovw": RESULTS_ARRAY_JSON[0],
-                    "cnn": RESULTS_ARRAY_JSON[0]}, 200)
+                    "bovw": RESULTS_ARRAY_JSON[1],
+                    "cnn": RESULTS_ARRAY_JSON[2]}, 200)
 
     
 # Basic search route
@@ -256,23 +255,20 @@ def rocchio():
         relevant_cnn = data["relevant_cnn"]
         nonrelevant_cnn = data["nonrelevant_cnn"]
 
-        global curr_query_simple
         
         basic_query = _basic_rocchio(relevant_basic, nonrelevant_basic)
+        bovw_query = _bovw_rocchio(relevant_basic, nonrelevant_basic)
+        cnn_query = _cnn_rocchio(relevant_basic, nonrelevant_basic)
 
         
         
         print("searching_again")
-        return _all_search(basic_query)
+        return _all_search(basic_query, bovw_query, cnn_query)
         
 
 def _basic_rocchio(relevant_imgs, nonrelevant_imgs, a=1, b=0.75, c=0.15):
     relevant_features = load_features(relevant_imgs, INDEX_SIMPLE)
     nonrelevant_features = load_features(nonrelevant_imgs, INDEX_SIMPLE)
-
-
-
-
 
     global curr_query_simple
     query_array = np.array(curr_query_simple)
@@ -289,12 +285,42 @@ def _basic_rocchio(relevant_imgs, nonrelevant_imgs, a=1, b=0.75, c=0.15):
     return new_query
 
 
-def _cnn_rocchio():
-    pass
+def _cnn_rocchio(relevant_imgs, nonrelevant_imgs, a=1, b=0.75, c=0.15):
+    relevant_features = load_features(relevant_imgs, INDEX_CNN)
+    nonrelevant_features = load_features(nonrelevant_imgs, INDEX_CNN)
+
+    global curr_query_cnn
+    query_array = np.array(curr_query_cnn)
+    
+    query_part = query_array * a
+    
+    sum_relevant = sum_vectors(relevant_features)
+    relevant_part = b * (1 / len(relevant_features)) * sum_relevant
+
+    sum_nonrelevant = sum_vectors(nonrelevant_features)
+    nonrelevant_part = c * (1 / len(nonrelevant_features)) * sum_nonrelevant
+
+    new_query = np.subtract(np.add(query_part, relevant_part), nonrelevant_part)
+    return new_query
 
 
-def _bovw_rocchio():
-    pass
+def _bovw_rocchio(relevant_imgs, nonrelevant_imgs, a=1, b=0.75, c=0.15):
+    relevant_features = load_features(relevant_imgs, INDEX_BOVW)
+    nonrelevant_features = load_features(nonrelevant_imgs, INDEX_BOVW)
+
+    global curr_query_bovw
+    query_array = np.array(curr_query_bovw)
+    
+    query_part = query_array * a
+    
+    sum_relevant = sum_vectors(relevant_features)
+    relevant_part = b * (1 / len(relevant_features)) * sum_relevant
+
+    sum_nonrelevant = sum_vectors(nonrelevant_features)
+    nonrelevant_part = c * (1 / len(nonrelevant_features)) * sum_nonrelevant
+
+    new_query = np.subtract(np.add(query_part, relevant_part), nonrelevant_part)
+    return new_query
 
 
 
@@ -318,6 +344,8 @@ def cnn_search(filestr):
 
         query_features = model.predict(img_array)
         features_numpy = np.array(query_features)
+
+        global curr_query_cnn
         curr_query_cnn = features_numpy.flatten()
 
         (dist, img_ids) = searcher.search(curr_query_cnn, 10)
@@ -353,6 +381,7 @@ def bovw_search(filestr):
         clusters = load(CLUSTER)
 
         query_histogram = histogramBuilder.build_histogram_from_clusters(descriptors, clusters)
+        global curr_query_bovw
         curr_query_bovw = query_histogram
         
 
@@ -441,6 +470,64 @@ def basic_search_query(query_features):
 
         # Return error
         return jsonify({"sorry": "Sorry, no results! Please try again."}), 500
+
+
+
+def bovw_search_query(query_features): 
+    RESULTS_ARRAY = []
+    try:
+        searcher = SearcherBovw(INDEX_BOVW)
+
+        # Load querry image and describe it
+        import cv2
+
+        global curr_query_bovw
+        curr_query_bovw = query_features
+        
+
+
+        (distances, image_ids) = searcher.search(query_features, 10)
+
+        # Loop over the results and displaying score and image name
+        for i in range(len(image_ids)):
+            RESULTS_ARRAY.append(
+                {"image": str(image_ids[i]), "score": str(distances[i])}
+                )
+
+
+        return RESULTS_ARRAY[:10]
+
+    except Exception as inst:
+        print(inst)
+
+        # Return error
+        return jsonify({"sorry": "Sorry, no results! Please try again."}), 500
+
+
+def cnn_search_query(query_features): 
+    RESULTS_ARRAY = []
+    try:
+        searcher = SearcherCNN(INDEX_CNN)
+
+        import cv2
+
+        global curr_query_cnn
+        curr_query_cnn = query_features
+
+        (dist, img_ids) = searcher.search(curr_query_cnn, 10)
+
+
+        for i in range(len(img_ids)):
+            RESULTS_ARRAY.append(
+                {"image": str(img_ids[i]), "score": str(dist[i])}
+                )
+            
+
+        return RESULTS_ARRAY[:10]
+    except:
+        return jsonify({"sorry": "Sorry, no results! Please try again."}), 500            
+
+
 
     
 #==== HELPER FUNCTIONS ====#    
