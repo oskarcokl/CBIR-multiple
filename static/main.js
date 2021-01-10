@@ -4,6 +4,7 @@ const algorithmSelectElement = document.querySelector("#algorithm-select");
 const queryImageElement = $("#query-image-show");
 const searchingElement = $("#searching");
 const errorElement = $("#error");
+const succesElement = $("#success");
 let data = [];
 let isSearching = false;
 let algorithm = "simple";
@@ -14,6 +15,7 @@ const init = () => {
 
     handleSearching(false);
     errorElement.hide();
+    succesElement.hide();
 
     queryImageElement.hide();
     
@@ -79,6 +81,7 @@ function sendImageForIndex() {
 	body: formData
     })
 	.then (response => {
+	    displaySuccessMessage("Test");
 	    console.log(response);
 	})
 	.then (success => {
@@ -154,6 +157,15 @@ function styleResultsAndShow(data, id) {
 	document.querySelector(id).append(tr);
     };
 
+}
+
+function displaySuccessMessage(message) {
+    successElement.text(message);
+    successElement.show();
+}
+
+function hideSuccesMessage() {
+    successElement.hide();
 }
 
 function markImage(event) {
