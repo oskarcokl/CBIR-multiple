@@ -1,28 +1,43 @@
 import numpy as np
-from shutil import copy
+import shutil
 import glob
+import argparse
+import os
+
 from sklearn.model_selection import train_test_split
 
-folder = "../static/images"
 
 
+def split_dataset():
+        argParser = argparse.ArgumentParser()
+        argParser.add_argument("-s", "--source", required=True,
+                               help="Path to directory that contains images you want to copy.")
+        argParser.add_argument("-d", "--destination", required=True,
+                               help="Directory to which the images will be coppied.")
+        argParser.add_argument("-n", "--number", required=True,
+                               help="Number of images to copy from each directory.")
+        args = vars(argParser.parse_args())
 
-def split_dataset(folder):
-	images = []
+        
 
-	for imagePath in glob.glob(folder + "/*.jpg"):
-		images.append(imagePath)
 
-	images_train, images_test = train_test_split(images, test_size=0.2)
+        src = args["source"]
+        dst = args["destination"]
+        n_images = args["number"]
 
-	for image in images_train:
-		print("Copying ", image)
-		dst = "../data/train"
-		copy(image, dst)
+        with os.scandir(src) as entries:
+                for entry in entries:
+                        path = os.path.join(src, entry.name)
+                        with os.scandir(path) as images:
+                                i = 0
+                                for image in images:
+                                        if (i <= int(n_images)):
+                                                shutil.copy(os.path.join(path, image.name), dst)
+                                                i += 1
+                                        else:
+                                                break
+        
+        
+        
 
-	for image in images_test:
-		print("Copying ", image)
-		dst = "../data/test"
-		copy(image, dst)
-
-split_dataset(folder)
+split_dataset()

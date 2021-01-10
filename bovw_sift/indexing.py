@@ -57,7 +57,7 @@ def index():
         # Getting clusters from the descriptor_list
         myKMeans = MyKMeans()
         print("Running k_means")
-        clusters = myKMeans.k_means_batch(300, descriptor_list, 100)
+        clusters = myKMeans.k_means_batch(10000, descriptor_list, 100)
         print("Finished k_means")
 
         dump(clusters, "train_k_means.joblib")
