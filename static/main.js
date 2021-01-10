@@ -4,7 +4,7 @@ const algorithmSelectElement = document.querySelector("#algorithm-select");
 const queryImageElement = $("#query-image-show");
 const searchingElement = $("#searching");
 const errorElement = $("#error");
-const succesElement = $("#success");
+const successElement = $("#success");
 let data = [];
 let isSearching = false;
 let algorithm = "simple";
@@ -15,7 +15,7 @@ const init = () => {
 
     handleSearching(false);
     errorElement.hide();
-    succesElement.hide();
+    successElement.hide();
 
     queryImageElement.hide();
     
@@ -29,6 +29,7 @@ const init = () => {
 }
 
 function queryImage(event) {
+    hideSuccessMessage();
     const image = this.files[0];
     const formData = new FormData();
     formData.append("img", image);
@@ -67,13 +68,12 @@ function queryImage(event) {
 
 function sendImageForIndex() {
     const formData = new FormData();
-
+    hideSuccessMessage();
+    
     for (let i = 0; i < this.files.length; i++) {
 	formData.append("img_"+i, this.files[i]);
     }
-
-    
-    console.log(formData);
+ 
     const url = "/all-index";
 
     fetch(url, {
@@ -81,18 +81,16 @@ function sendImageForIndex() {
 	body: formData
     })
 	.then (response => {
-	    displaySuccessMessage("Test");
+	    displaySuccessMessage("Images successfully added to index");
 	    console.log(response);
-	})
-	.then (success => {
-	    console.log(success);
 	})
 	.catch (err => {
 	    console.log(err);
 	});
 }
 
-function removeResults() { 
+function removeResults() {
+    hideSuccessMessage();
     $("#results-table").hide();
     removeChildNodes(document.querySelector("#results-basic"));
     removeChildNodes(document.querySelector("#results-bovw"));
@@ -164,7 +162,7 @@ function displaySuccessMessage(message) {
     successElement.show();
 }
 
-function hideSuccesMessage() {
+function hideSuccessMessage() {
     successElement.hide();
 }
 

@@ -143,15 +143,17 @@ def all_index():
         try: 
             images = request.files
 
+            print(images)
+            
             # Currentyl saving with every call. Might change later.
             _cnn_index(images)
             _bovw_index(images)
             _basic_index(images)        
 
-            return jsonify({"message": "Files index successfully."}, 200)
+            return jsonify(message="Files indexed successfully.")
         
         except:  
-            return jsonify({"message": "Something went wrong."}, 500)
+            return jsonify(message="Something went wrong.")
         
 # filestr is array of image strings
 def _cnn_index(images):
