@@ -26,7 +26,7 @@ from cnn.searcher import Searcher as SearcherCNN
 app = Flask(__name__)
 
 INDEX_SIMPLE = os.path.join(os.path.dirname(__file__), "./simple_color_search/index.csv")
-INDEX_BOVW = os.path.join(os.path.dirname(__file__), "./bovw_sift/index_all.csv")
+INDEX_BOVW = os.path.join(os.path.dirname(__file__), "./bovw_sift/index.csv")
 INDEX_CNN = os.path.join(os.path.dirname(__file__), "./cnn/index.csv")
 CLUSTER = os.path.join(os.path.dirname(__file__), "./bovw_sift/train_k_means.joblib")
 
@@ -72,10 +72,15 @@ def all_search():
         print("Done cnn")
         print("Done searching")
 
+        #print(RESULTS_ARRAY_JSON[0])
+        print(RESULTS_ARRAY_JSON[1])
+        #print(RESULTS_ARRAY_JSON[2])
 
-        return jsonify({"basic": RESULTS_ARRAY_JSON[0],
-                       "bovw": RESULTS_ARRAY_JSON[1],
-                        "cnn": RESULTS_ARRAY_JSON[2]}, 200)
+        response = jsonify({"basic" : RESULTS_ARRAY_JSON[0],
+                           "bovw" : RESULTS_ARRAY_JSON[1],
+                            "cnn" : RESULTS_ARRAY_JSON[2]}, 200)
+        
+        return response
 
 
 def _all_search(query_basic, query_bovw, query_cnn):
@@ -143,7 +148,6 @@ def all_index():
         try: 
             images = request.files
 
-            print(images)
             
             # Currentyl saving with every call. Might change later.
             _cnn_index(images)
@@ -397,6 +401,8 @@ def bovw_search(filestr):
                 )
 
 
+        print(RESULTS_ARRAY[:10])
+            
         return RESULTS_ARRAY[:10]
 
     except Exception as inst:
