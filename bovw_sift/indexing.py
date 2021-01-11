@@ -3,6 +3,7 @@ import numpy as np
 from sift_descriptor import SiftDescriptor
 from sklearn.cluster import KMeans
 from sklearn.cluster import MiniBatchKMeans
+from sklearn.preprocessing import StandardScaler
 from k_means import MyKMeans
 from histogram_builder import HistogramBuilder
 from joblib import dump, load
@@ -47,8 +48,8 @@ def index():
             image = cv2.imread(full_path_to_image)
             image_grayscale = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
             descriptor = siftDescriptor.describe(image)
-            descriptor_list.extend(descriptor)
-            descriptor_array.append(descriptor)
+            descriptor_list.append(descriptor)
+            #descriptor_array.append(descriptor)
             print(i, "out of", n_images)
             i += 1
 
@@ -57,7 +58,15 @@ def index():
         # Getting clusters from the descriptor_list
         myKMeans = MyKMeans()
         print("Running k_means")
-        clusters = myKMeans.k_means_batch(10000, descriptor_list, 100)
+
+        
+        print(len(descriptor_list[1:]))
+        print("Vstacking over")
+        vstack_descriptor = vstack_descriptors(descriptor_list)
+        print("Vstacking over")
+
+
+        clusters = myKMeans.k_means_batch(20, vstack_descriptor, 200)
         print("Finished k_means")
 
         dump(clusters, "train_k_means.joblib")
@@ -72,6 +81,7 @@ def index():
 
         # Reading images and getting their descriptors
         i = 1;
+        descriptor_list = []
         print("Building histograms")
         for imageID in os.listdir(dataset_folder_path):
             full_path_to_image = dataset_folder_path + imageID
@@ -79,6 +89,7 @@ def index():
             image_grayscale = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
             
             descriptor = siftDescriptor.describe(image)
+            descriptor_list.append(descriptor)
             
             histogram = histogramBuilder.build_histogram_from_clusters(descriptor, clusters)
 
@@ -96,6 +107,28 @@ def index():
 
 def write_to_index(histogram, imageID, indexFile):
     indexFile.write("%s,%s\n" % (imageID, ",".join(histogram.astype(str))))
- 
+
+
+def vstack_descriptors(descriptor_list):
+    i = 0
+    print(len(descriptor_list[1:]))
+    descriptors = np.array(descriptor_list[0])
+    for descriptor in descriptor_list[1:]:
+        print(i)
+        i+=1
+        descriptors = np.vstack((descriptors, descriptor))
+
+    return descriptors
+
+def extract_features(kmeans, descriptor_list, n_images, n_clusters):
+    img_features = np.array([np.zeros(n_clusters) for i in range(n_images)])
+    for i in range(n_images):
+        for j in range(len(descriptor_list[i])):
+            feature = descriptor_list[i][j]
+            feature = feature.reshape(1, 128)
+            idx = kmeans.predict(feature)
+            img_features[i][idx] += 1
+
+    return img_features
 
 index()
