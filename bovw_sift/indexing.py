@@ -22,6 +22,9 @@ def index():
         help="Path to where teh computed idnex will be stored")
     argParser.add_argument("-t", "--training", action="store_const", const="train",
                            help="If you want to jus train the knn model no csv file will be created")
+    argParser.add_argument("-c", "--clusters", default=50,
+                           help="Number of clusters for the k_means model.")
+                           
     args = vars(argParser.parse_args())
 
 
@@ -37,6 +40,7 @@ def index():
 
     descriptor_list = []
     descriptor_array = []
+    n_clusters = int(args["clusters"])
 
     if args["training"] == "train":
 
@@ -66,7 +70,8 @@ def index():
         print("Vstacking over")
 
 
-        clusters = myKMeans.k_means_batch(20, vstack_descriptor, 200)
+        
+        clusters = myKMeans.k_means_batch(n_clusters, vstack_descriptor, 200)
         print("Finished k_means")
 
         dump(clusters, "train_k_means.joblib")
@@ -82,24 +87,34 @@ def index():
         # Reading images and getting their descriptors
         i = 1;
         descriptor_list = []
+        image_ids = []
         print("Building histograms")
         for imageID in os.listdir(dataset_folder_path):
+            image_ids.append(imageID)
             full_path_to_image = dataset_folder_path + imageID
             image = cv2.imread(full_path_to_image)
             image_grayscale = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
             
             descriptor = siftDescriptor.describe(image)
             descriptor_list.append(descriptor)
-            
-            histogram = histogramBuilder.build_histogram_from_clusters(descriptor, clusters)
-
-            
-            print("Writing to index file")
-            write_to_index(histogram, imageID, indexFile)
-            print("Finished writing to index file")
-    
             print(i, "out of", n_images)
             i += 1
+
+
+        features_list = extract_features(clusters, descriptor_list, n_images, n_clusters)
+
+
+        scale = StandardScaler().fit(features_list)
+        features_list = scale.transform(features_list)
+        
+        print(features_list.shape)
+
+        index = 0
+        for feature in features_list:
+            write_to_index(feature, image_ids[index], indexFile)
+            index+=1
+        
+        
         indexFile.close()
         print("Finished")
 
@@ -130,5 +145,7 @@ def extract_features(kmeans, descriptor_list, n_images, n_clusters):
             img_features[i][idx] += 1
 
     return img_features
+
+
 
 index()

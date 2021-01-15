@@ -10,6 +10,10 @@ class Searcher:
         # Intialize dictionary of result
         results = {}
 
+        open
+
+        breakpoint()
+
         # Open index file for searching
         with open(self.indexPath) as indexFile:
             reader = csv.reader(indexFile)

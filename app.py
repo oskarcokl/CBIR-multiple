@@ -3,6 +3,7 @@ import os
 from flask import Flask, render_template, request, jsonify
 
 import numpy as np
+from colorama import init, Fore, Back
 import csv
 from joblib import load
 import tensorflow as tf
@@ -24,6 +25,7 @@ from cnn.searcher import Searcher as SearcherCNN
 
 # Create flast instance
 app = Flask(__name__)
+init()
 
 INDEX_SIMPLE = os.path.join(os.path.dirname(__file__), "./simple_color_search/index.csv")
 INDEX_BOVW = os.path.join(os.path.dirname(__file__), "./bovw_sift/index.csv")
@@ -148,51 +150,66 @@ def all_index():
         try: 
             images = request.files
 
+            (img_paths, img_names) = save_imgs(images)
             
             # Currentyl saving with every call. Might change later.
-            _cnn_index(images)
-            _bovw_index(images)
-            _basic_index(images)        
+            print(Fore.GREEN + "Indexing for color algorithm")
+            _basic_index(img_paths, img_names)        
+            print(Fore.GREEN + "Done indexing for color algorithm")
+            print(Fore.GREEN + "Indexing for cnn algorithm")
+            _cnn_index(img_paths, img_names)
+            print(Fore.GREEN + "Done indexing for cnn algorithm")
+            # _bovw_index(images)
 
+            print(Back.RESET + Fore.RESET)
             return jsonify(message="Files indexed successfully.")
         
-        except:  
+        except Exception as e:
+            print(e)
             return jsonify(message="Something went wrong.")
         
 # filestr is array of image strings
-def _cnn_index(images):
-    if os.path.isdir(VGG16_CNN):
-        model = keras.models.load_model(VGG16_CNN)
-        print("Loading local vgg16")
-    else:
-        model = VGG16(weights="imagenet", include_top=False)
-        print("Downloading vgg16")
+def _cnn_index(img_paths, img_names):
+    try:
 
-
-    index_file = open(INDEX_CNN, "a")  
-
-    for key in images:
-        img = images[key]
-        img_name = img.filename
-        img_path = os.path.join(STATIC, img_name)
-
-        img.save(img_path)
-
+        breakpoint()
+        print("Bruh wtf")
         
-        img = image.load_img(img_path, target_size=(244, 244))
-        img_array = image.img_to_array(img)
-        img_array = np.expand_dims(img_array, axis=0)
-        img_array = preprocess_input(img_array)
+        if os.path.isdir(VGG16_CNN):
+            model = keras.models.load_model(VGG16_CNN)
+            print("Loading local vgg16")
+        else:
+            model = VGG16(weights="imagenet", include_top=False)
+            print("Downloading vgg16")
+        index_file = open(INDEX_CNN, "a")
 
-        features = model.predict(img_array)
-        features_numpy = np.array(features)
+        for i in range(len(img_paths)):
+            img = image.loag_img(img_paths[i], target_size(244, 244))
+            
+            img_array = image.img_to_array(img)
+            img_array = np.expand_dims(img_array, axis=0)
+            img_array = preprocess_input(img_array)
 
-        #save file to static/images
+            features = model.predict(img_array)
+            features_numpy = np.array(features)
 
-        write_to_index(features_numpy.flatten(), img_name, index_file)
+            #save file to static/images
 
-    index_file.close()
-    return
+            write_to_index(features_numpy.flatten(), img_name, index_file)
+
+        index_file.close()
+        return
+
+        for key in images:
+            img = images[key]
+            img_name = img.filename
+            img_path = os.path.join(STATIC, img_name)
+
+            img.save(img_path)
+
+
+            img = image.load_img(img_path, target_size=(244, 244))
+    except Exception as e: print(e)
 
 
 def _bovw_index(images):
@@ -225,25 +242,24 @@ def _bovw_index(images):
     index_file.close()
     return
         
-def _basic_index(images):
-    index_file = open(INDEX_SIMPLE, "a")
+def _basic_index(img_paths, img_names):
+    try:
+        index_file = open(INDEX_SIMPLE, "a") 
+        colorDescriptor = ColorDescriptor((8, 12, 3))
+        for i in range(len(img_paths)):
+            img = cv2.imread(img_paths[i])
+            img_name = img_names[i]
+            
+            features = colorDescriptor.describe(img)
+            features_array = np.array(features)
 
-    colorDescriptor = ColorDescriptor((8, 12, 3))
+            write_to_index(features_array, img_name, index_file)
+
+        index_file.close()
+        return
+
+    except Exception as e: print(e)
     
-    for key in images:
-        img = images[key]
-        img_name = img.filename
-        img_path = os.path.join(STATIC, img_name)
-        img.save(img_path)
-
-        img = cv2.imread(img_path)
-        features = colorDescriptor.describe(img)
-        features_array = np.array(features)
-        
-        write_to_index(features_array, img_name, index_file)
-
-    index_file.close()
-    return
 
 #==== ROCCHIO ====#
 
@@ -383,25 +399,39 @@ def bovw_search(filestr):
         # Query image is already in BGR
         query_image = cv2.imdecode(npimg, -1)
         query_image_grayscale = cv2.cvtColor(query_image, cv2.COLOR_BGR2GRAY)
-        descriptors = siftDescriptor.describe(query_image_grayscale) 
-        clusters = load(CLUSTER)
+        descriptors = siftDescriptor.describe(query_image_grayscale)
+        query_histogram = np.zeros(1000)
+        kmeans = load(CLUSTER)
 
-        query_histogram = histogramBuilder.build_histogram_from_clusters(descriptors, clusters)
+        print("making_histogram")
+        for i in range(len(descriptors)):
+            feature = descriptors[i]
+            feature = feature.reshape(1, 128)
+            index = kmeans.predict(feature)
+            query_histogram[index[0]] += 1
+        print("finished histogram")
+
+    
+
         global curr_query_bovw
         curr_query_bovw = query_histogram
         
 
 
-        (distances, image_ids) = searcher.search(query_histogram, 10)
+        results = searcher.search(query_histogram, 10)
 
         # Loop over the results and displaying score and image name
-        for i in range(len(image_ids)):
+        # for i in range(len(image_ids)):
+        #     RESULTS_ARRAY.append(
+        #         {"image": str(image_ids[i]), "score": str(distances[i])}
+        #         )
+
+        for (score, result_id) in results:
             RESULTS_ARRAY.append(
-                {"image": str(image_ids[i]), "score": str(distances[i])}
+                {"image": str(result_id), "score": str(score)}
                 )
 
-
-        print(RESULTS_ARRAY[:10])
+        #print(RESULTS_ARRAY[:10])
             
         return RESULTS_ARRAY[:10]
 
@@ -494,14 +524,20 @@ def bovw_search_query(query_features):
         
 
 
-        (distances, image_ids) = searcher.search(query_features, 10)
+        results = searcher.search(query_features, 10)
 
         # Loop over the results and displaying score and image name
-        for i in range(len(image_ids)):
-            RESULTS_ARRAY.append(
-                {"image": str(image_ids[i]), "score": str(distances[i])}
-                )
+        # for i in range(len(image_ids)):
+        #     RESULTS_ARRAY.append(
+        #         {"image": str(image_ids[i]), "score": str(distances[i])}
+        #         )
 
+
+        for (score, result_id) in results:
+            RESULTS_ARRAY.append(
+                {"image": str(result_id), "score": str(score)}
+                )
+        
 
         return RESULTS_ARRAY[:10]
 
@@ -542,6 +578,30 @@ def cnn_search_query(query_features):
     
 def write_to_index(features, imageID, indexFile):
     indexFile.write("%s,%s\n" % (imageID, ",".join(features.astype(str))))
+
+def save_imgs(imgs):
+
+    img_paths = []
+    img_names = []
+    
+    for key in imgs:
+        (img_path, img_name) = save_img(imgs[key])
+        img_paths.append(img_path)
+        img_names.append(img_name)
+
+    return img_paths, img_names
+        
+        
+def save_img(img):
+    img_path = os.path.join(STATIC, img.filename)
+    print(Fore.BLUE + "Saving img")
+    print(img_path)
+    img.save(os.path.join(STATIC, img.filename))
+    print(Fore.RESET)
+    return img_path, img.filename
+
+    
+
 
 def load_features(img_ids, index_path):
     n_vectors = len(img_ids)

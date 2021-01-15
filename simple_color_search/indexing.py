@@ -22,6 +22,8 @@ for imagePath in glob.glob(args["dataset"] + "/*.jpg"):
     imageID = imagePath[imagePath.rfind("\\") + 1:]
     image = cv2.imread(imagePath)
 
+    breakpoint()
+
     # get the features 
     features = colorDescriptor.describe(image)
 
