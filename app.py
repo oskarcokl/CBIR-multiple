@@ -152,17 +152,20 @@ def all_index():
 
             (img_paths, img_names) = save_imgs(images)
             
-            # Currentyl saving with every call. Might change later.
-            print(Fore.GREEN + "Indexing for color algorithm")
-            _basic_index(img_paths, img_names)        
-            print(Fore.GREEN + "Done indexing for color algorithm")
-            print(Fore.GREEN + "Indexing for cnn algorithm")
-            _cnn_index(img_paths, img_names)
-            print(Fore.GREEN + "Done indexing for cnn algorithm")
-            # _bovw_index(images)
+            if img_paths and img_names: 
+                # Currentyl saving with every call. Might change later.
+                print(Fore.GREEN + "Indexing for color algorithm")
+                _basic_index(img_paths, img_names)        
+                print(Fore.GREEN + "Done indexing for color algorithm")
+                print(Fore.GREEN + "Indexing for cnn algorithm")
+                _cnn_index(img_paths, img_names)
+                print(Fore.GREEN + "Done indexing for cnn algorithm")
+                #_bovw_index(images)
 
-            print(Back.RESET + Fore.RESET)
-            return jsonify(message="Files indexed successfully.")
+                print(Back.RESET + Fore.RESET)
+                return jsonify(message="Files indexed successfully.")
+            else: 
+                return jsonify(message="Files already indexed.")
         
         except Exception as e:
             print(e)
@@ -170,11 +173,7 @@ def all_index():
         
 # filestr is array of image strings
 def _cnn_index(img_paths, img_names):
-    try:
-
-        breakpoint()
-        print("Bruh wtf")
-        
+    try: 
         if os.path.isdir(VGG16_CNN):
             model = keras.models.load_model(VGG16_CNN)
             print("Loading local vgg16")
@@ -199,16 +198,6 @@ def _cnn_index(img_paths, img_names):
 
         index_file.close()
         return
-
-        for key in images:
-            img = images[key]
-            img_name = img.filename
-            img_path = os.path.join(STATIC, img_name)
-
-            img.save(img_path)
-
-
-            img = image.load_img(img_path, target_size=(244, 244))
     except Exception as e: print(e)
 
 
@@ -579,15 +568,21 @@ def cnn_search_query(query_features):
 def write_to_index(features, imageID, indexFile):
     indexFile.write("%s,%s\n" % (imageID, ",".join(features.astype(str))))
 
+def check_if_img_exists(img_path):
+    return os.path.isfile(img_path)
+    
 def save_imgs(imgs):
-
     img_paths = []
     img_names = []
     
     for key in imgs:
-        (img_path, img_name) = save_img(imgs[key])
-        img_paths.append(img_path)
-        img_names.append(img_name)
+        img = imgs[key]
+        file_exists = check_if_img_exists(os.path.join(STATIC, img.filename))
+        
+        if not file_exists:
+            (img_path, img_name) = save_img(img)
+            img_paths.append(img_path)
+            img_names.append(img_name)
 
     return img_paths, img_names
         
