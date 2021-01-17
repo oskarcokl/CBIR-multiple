@@ -408,7 +408,6 @@ def bovw_search(filestr):
 
         img_ids = get_ids(image_idxs, INDEX_BOVW)
 
-        breakpoint()
         
         for i in range(len(img_ids)):
             RESULTS_ARRAY.append(
