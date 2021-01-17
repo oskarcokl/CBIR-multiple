@@ -8,7 +8,6 @@ class MyKMeans:
         return visual_words
 
     def k_means_batch(self, k, descriptor_list, batch):
-        print("What")
         visual_words = MiniBatchKMeans(n_clusters=k, batch_size=batch)
         print("Fitting")
         visual_words.fit(descriptor_list)

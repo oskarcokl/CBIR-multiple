@@ -24,6 +24,8 @@ def index():
                            help="If you want to jus train the knn model no csv file will be created")
     argParser.add_argument("-c", "--clusters", default=50,
                            help="Number of clusters for the k_means model.")
+    argParser.add_argument("-f", "--features", default=200,
+                           help="Number of features for the sift descriptor.")
                            
     args = vars(argParser.parse_args())
 
@@ -35,8 +37,9 @@ def index():
     n_images = len([name for name in os.listdir(dataset_folder_path) if os.path.isfile(os.path.join(dataset_folder_path, name))])
 
 
+    n_features = int(args["features"])
     imageLoader = ImageLoader()
-    siftDescriptor = SiftDescriptor()
+    siftDescriptor = SiftDescriptor(n_features)
 
     descriptor_list = []
     descriptor_array = []
@@ -44,37 +47,44 @@ def index():
 
     if args["training"] == "train":
 
+        try:
+            # Reading images and getting their descriptors
+            i = 1;
+            for imageID in os.listdir(dataset_folder_path):
+                full_path_to_image = dataset_folder_path + imageID
+                image = cv2.imread(full_path_to_image)
+                image_grayscale = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+                #print("Describing")
+                descriptor = siftDescriptor.describe(image)
+                #breakpoint()
+                #print("Done")            
 
-        # Reading images and getting their descriptors
-        i = 1;
-        for imageID in os.listdir(dataset_folder_path):
-            full_path_to_image = dataset_folder_path + imageID
-            image = cv2.imread(full_path_to_image)
-            image_grayscale = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-            descriptor = siftDescriptor.describe(image)
-            descriptor_list.append(descriptor)
-            #descriptor_array.append(descriptor)
-            print(i, "out of", n_images)
-            i += 1
-
-
-        
-        # Getting clusters from the descriptor_list
-        myKMeans = MyKMeans()
-        print("Running k_means")
-
-        
-        print(len(descriptor_list[1:]))
-        print("Vstacking over")
-        vstack_descriptor = vstack_descriptors(descriptor_list)
-        print("Vstacking over")
+                descriptor_list.extend(descriptor)
+                #descriptor_array.append(descriptor)
+                #print(i, "out of", n_images)
+                i += 1
 
 
-        
-        clusters = myKMeans.k_means_batch(n_clusters, vstack_descriptor, 200)
-        print("Finished k_means")
 
-        dump(clusters, "train_k_means.joblib")
+            # Getting clusters from the descriptor_list
+            myKMeans = MyKMeans()
+            print("Running k_means")
+
+
+            # print("Vstacking over")
+            # vstack_descriptor = vstack_descriptors(descriptor_list)
+            # print("Vstacking over")
+
+
+
+            clusters = myKMeans.k_means_batch(n_clusters, descriptor_list, 600)
+
+            print(n_clusters)
+            print(clusters.inertia_)
+            print("Finished k_means")
+
+            dump(clusters, "train_k_means.joblib")
+        except Exception as e: print(e)
     else:
 
         # Open the indexFile in which we will save the indexed images
