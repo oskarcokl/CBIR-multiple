@@ -74,9 +74,9 @@ def all_search():
         print("Done cnn")
         print("Done searching")
 
-        #print(RESULTS_ARRAY_JSON[0])
+        print(RESULTS_ARRAY_JSON[0])
         print(RESULTS_ARRAY_JSON[1])
-        #print(RESULTS_ARRAY_JSON[2])
+        print(RESULTS_ARRAY_JSON[2])
 
         response = jsonify({"basic" : RESULTS_ARRAY_JSON[0],
                            "bovw" : RESULTS_ARRAY_JSON[1],
@@ -399,25 +399,28 @@ def bovw_search(filestr):
 
         (distance, image_idxs) = searcher.search(query_histogram, 10)
 
+
         # Loop over the results and displaying score and image name
         # for i in range(len(image_ids)):
         #     RESULTS_ARRAY.append(
         #         {"image": str(image_ids[i]), "score": str(distances[i])}
         #         )
 
-        img_ids = get_ids(image_idxs)
+        img_ids = get_ids(image_idxs, INDEX_BOVW)
+
+        breakpoint()
         
         for i in range(len(img_ids)):
             RESULTS_ARRAY.append(
-                {"image": str(img_ids[i]), "score": str(distance[i])}
+                {"image": str(img_ids[i]), "score": str(distance[0][i])}
                 )
 
-        #print(RESULTS_ARRAY[:10])
+        print(RESULTS_ARRAY[:10])
             
         return RESULTS_ARRAY[:10]
 
-    except Exception as inst:
-        print(inst)
+    except Exception as e:
+        print(e)
 
         # Return error
         return jsonify({"sorry": "Sorry, no results! Please try again."}), 500
@@ -506,11 +509,11 @@ def bovw_search_query(query_features):
 
 
         (distances, img_idxs) = searcher.search(query_features, 10)
-        img_ids = get_ids(img_idxs)
+        img_ids = get_ids(img_idxs, INDEX_BOVW)
         
         for i in range(len(img_ids)):
             RESULTS_ARRAY.append(
-                {"image": str(img_ids[i]), "score": str(distances[i])}
+                {"image": str(img_ids[i]), "score": str(distances[0][i])}
                 )
 
         

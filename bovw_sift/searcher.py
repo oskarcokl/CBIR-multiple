@@ -1,6 +1,6 @@
 import os
 import numpy as np
-from image_loader import ImageLoader
+#from image_loader import ImageLoader
 from sklearn.neighbors import NearestNeighbors
 import csv
 

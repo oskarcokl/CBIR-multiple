@@ -12,7 +12,6 @@ class Searcher:
 
         open
 
-        breakpoint()
 
         # Open index file for searching
         with open(self.indexPath) as indexFile:
