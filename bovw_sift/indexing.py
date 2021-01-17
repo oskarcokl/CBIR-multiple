@@ -77,7 +77,7 @@ def index():
 
 
 
-            clusters = myKMeans.k_means_batch(n_clusters, descriptor_list, 600)
+            clusters = myKMeans.k_means(n_clusters, descriptor_list)
 
             print(n_clusters)
             print(clusters.inertia_)
@@ -86,47 +86,46 @@ def index():
             dump(clusters, "train_k_means.joblib")
         except Exception as e: print(e)
     else:
+        try:
+            # Open the indexFile in which we will save the indexed images
+            indexFile = open(args["index"], "w")
+            clusters = load("train_k_means.joblib")
 
-        # Open the indexFile in which we will save the indexed images
-        indexFile = open(args["index"], "w")
-        clusters = load("train_k_means.joblib")
-        
-        histogramBuilder = HistogramBuilder()
-
-
-        # Reading images and getting their descriptors
-        i = 1;
-        descriptor_list = []
-        image_ids = []
-        print("Building histograms")
-        for imageID in os.listdir(dataset_folder_path):
-            image_ids.append(imageID)
-            full_path_to_image = dataset_folder_path + imageID
-            image = cv2.imread(full_path_to_image)
-            image_grayscale = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-            
-            descriptor = siftDescriptor.describe(image)
-            descriptor_list.append(descriptor)
-            print(i, "out of", n_images)
-            i += 1
+            histogramBuilder = HistogramBuilder()
 
 
-        features_list = extract_features(clusters, descriptor_list, n_images, n_clusters)
+            # Reading images and getting their descriptors
+            i = 1;
+            descriptor_list = []
+            image_ids = []
+            print("Building histograms")
+            for imageID in os.listdir(dataset_folder_path):
+                image_ids.append(imageID)
+                full_path_to_image = dataset_folder_path + imageID
+                image = cv2.imread(full_path_to_image)
+                image_grayscale = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+                descriptor = siftDescriptor.describe(image)
+                descriptor_list.append(descriptor)
+                print(i, "out of", n_images)
+                i += 1
+
+            features_list = extract_features(clusters, descriptor_list, n_images, n_clusters)
+
+            scale = StandardScaler().fit(features_list)
+            features_list = scale.transform(features_list)
+
+            print(features_list.shape)
+
+            index = 0
+            for feature in features_list:
+                write_to_index(feature, image_ids[index], indexFile)
+                index+=1
 
 
-        scale = StandardScaler().fit(features_list)
-        features_list = scale.transform(features_list)
-        
-        print(features_list.shape)
-
-        index = 0
-        for feature in features_list:
-            write_to_index(feature, image_ids[index], indexFile)
-            index+=1
-        
-        
-        indexFile.close()
-        print("Finished")
+            indexFile.close()
+            print("Finished")
+        except Exception as e: print(e)
 
 
 
@@ -156,6 +155,20 @@ def extract_features(kmeans, descriptor_list, n_images, n_clusters):
 
     return img_features
 
+def compute_histogram(descriptors, k_means):
+    histogram = np.zeros(len(k_means.cluster_center))
+    predictions = k_means.predict(descriptors)
+    for prediction in predictions:
+        histogram[prediction] += 1
+    return histogram
+
+def compute_histograms(descriptors_list, k_means):
+    histograms = []
+    for descriptors in descriptors_list:
+        histogram = compute_histogram(descriptors, k_means)
+        histograms.append(histogram)
+    return histograms
+        
 
 
 index()
