@@ -20,3 +20,18 @@ class HistogramBuilder:
             histograms.append(histogram)
 
         return histograms
+
+
+    def compute_histogram(self, descriptors, k_means):
+        histogram = np.zeros(len(k_means.cluster_centers_))
+        predictions = k_means.predict(descriptors)
+        for prediction in predictions:
+            histogram[prediction] += 1
+        return histogram
+
+    def compute_histograms(self, descriptors_list, k_means):
+        histograms = []
+        for descriptors in descriptors_list:
+            histogram = compute_histogram(descriptors, k_means)
+            histograms.append(histogram)
+        return histograms

@@ -107,7 +107,7 @@ def index():
                 print(i, "out of", n_images)
                 i += 1
 
-            histograms_list = compute_histograms(descriptor_list)
+            histograms_list = compute_histograms(descriptor_list, clusters)
             
             write_to_index_all(histograms_list, image_ids, indexFile)
 
@@ -148,7 +148,7 @@ def extract_features(kmeans, descriptor_list, n_images, n_clusters):
     return img_features
 
 def compute_histogram(descriptors, k_means):
-    histogram = np.zeros(len(k_means.cluster_center))
+    histogram = np.zeros(len(k_means.cluster_centers_))
     predictions = k_means.predict(descriptors)
     for prediction in predictions:
         histogram[prediction] += 1

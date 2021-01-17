@@ -1,12 +1,32 @@
 from sift_descriptor import SiftDescriptor
 from searcher import Searcher
-from image_loader import ImageLoader
+#from image_loader import ImageLoader
 import argparse
 from k_means import MyKMeans
 from histogram_builder import HistogramBuilder 
 import cv2
 from joblib import dump, load
 import csv
+import os
+
+
+def get_ids(image_idxs):
+
+    with open(args["index"]) as index_file:
+        reader = csv.reader(index_file)
+
+        ids = []
+
+        for row in reader:
+            ids.append(row[0])
+
+
+        image_ids = []
+        for image_idx in image_idxs[0]:
+            image_ids.append(ids[image_idx])
+
+        return image_ids
+
 
 argParser = argparse.ArgumentParser()
 argParser.add_argument("-i", "--index", required=True,
@@ -19,7 +39,7 @@ argParser.add_argument("-r", "--result_path", required=True,
 args = vars(argParser.parse_args())
 
 # Initialize siftDescriptor
-siftDescriptor = SiftDescriptor()
+siftDescriptor = SiftDescriptor(200)
 histogramBuilder = HistogramBuilder()
 searcher = Searcher(args["index"])
 
@@ -29,15 +49,25 @@ query_image_grayscale = cv2.cvtColor(query_image, cv2.COLOR_BGR2GRAY)
 descriptors = siftDescriptor.describe(query_image_grayscale)
 
 clusters = load("train_k_means.joblib")
-query_histogram = histogramBuilder.build_histogram_from_clusters(descriptors, clusters)
+query_histogram = histogramBuilder.compute_histogram(descriptors, clusters)
 
-(distance, image_ids) = searcher.search(query_histogram, 10)
+(distance, image_idxs) = searcher.search(query_histogram, 10)
+
+#breakpoint()
+
+image_ids = get_ids(image_idxs)
 
 query_resized = cv2.resize(query_image, (720, 480))
 cv2.imshow("Query", query_resized)
 
 for image_id in image_ids:
+    img_path = os.path.join(args["result_path"], image_id)
+    
     result_image = cv2.imread(args["result_path"] + image_id)
+
+
     result_resized = cv2.resize(result_image, (720, 480))
     cv2.imshow("Result", result_resized)
     cv2.waitKey(0)
+
+

@@ -209,7 +209,7 @@ def _bovw_index(images):
 
     index_file = open(INDEX_BOVW, "a")
     histogramBuilder = HistogramBuilder()
-    siftDescriptor = SiftDescriptor()
+    siftDescriptor = SiftDescriptor(200)
 
     for key in images:
         img = images[key]
@@ -222,7 +222,7 @@ def _bovw_index(images):
         index_img_grayscale = cv2.imread(img_path, 0)
         
         descriptors = siftDescriptor.describe(index_img_grayscale) 
-        index_histogram = histogramBuilder.build_histogram_from_clusters(descriptors, clusters)
+        index_histogram = histogramBuilder.compute_histogram(descriptors, clusters)
 
         #save file to static/images
         
@@ -377,7 +377,7 @@ def bovw_search(filestr):
     RESULTS_ARRAY = []
     try:
         # Initialize the colordescriptor
-        siftDescriptor = SiftDescriptor()
+        siftDescriptor = SiftDescriptor(200)
         histogramBuilder = HistogramBuilder()
         searcher = SearcherBovw(INDEX_BOVW)
 

@@ -1,6 +1,6 @@
 import os
 import numpy as np
-from .image_loader import ImageLoader
+from image_loader import ImageLoader
 from sklearn.neighbors import NearestNeighbors
 import csv
 
@@ -29,25 +29,27 @@ class Searcher:
                 histogram = [float(x) for x in row[1:]]
                 image_ids_all.append(row[0])
                 histograms.append(histogram)
-                dist = self.cosine_similarity(query_histogram, histogram)
-                results[row[0]] = dist
+                #dist = self.cosine_similarity(query_histogram, histogram)
+                #results[row[0]] = dist
 
                                          
 
                 
 
-            # neighborModel = NearestNeighbors(n_neighbors = neighbors)
-            # neighborModel.fit(histograms)
+            neighborModel = NearestNeighbors(n_neighbors = neighbors)
+            neighborModel.fit(histograms)
 
-            # (dist, results) = neighborModel.kneighbors([queryHistogram])
+            (dist, results) = neighborModel.kneighbors([query_histogram])
             
 
                 
         indexFile.close()
 
-        results = sorted([(v, k) for (k, v) in results.items()])
+        # results = sorted([(v, k) for (k, v) in results.items()])
 
-        return results[:10]
+        # breakpoint()
+        
+        return dist, results
  
         # image_ids = []
 
