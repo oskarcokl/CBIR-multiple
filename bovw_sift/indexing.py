@@ -91,9 +91,6 @@ def index():
             indexFile = open(args["index"], "w")
             clusters = load("train_k_means.joblib")
 
-            histogramBuilder = HistogramBuilder()
-
-
             # Reading images and getting their descriptors
             i = 1;
             descriptor_list = []
@@ -110,18 +107,9 @@ def index():
                 print(i, "out of", n_images)
                 i += 1
 
-            features_list = extract_features(clusters, descriptor_list, n_images, n_clusters)
-
-            scale = StandardScaler().fit(features_list)
-            features_list = scale.transform(features_list)
-
-            print(features_list.shape)
-
-            index = 0
-            for feature in features_list:
-                write_to_index(feature, image_ids[index], indexFile)
-                index+=1
-
+            histograms_list = compute_histograms(descriptor_list)
+            
+            write_to_index_all(histograms_list, image_ids, indexFile)
 
             indexFile.close()
             print("Finished")
@@ -132,6 +120,10 @@ def index():
 def write_to_index(histogram, imageID, indexFile):
     indexFile.write("%s,%s\n" % (imageID, ",".join(histogram.astype(str))))
 
+def write_to_index_all(histograms_list, img_ids, index_file):
+    for i in range(len(histograms_list)):
+        write_to_index(histograms_list[i], img_ids[i], index_file)
+    return
 
 def vstack_descriptors(descriptor_list):
     i = 0
