@@ -201,35 +201,33 @@ def _cnn_index(img_paths, img_names):
     except Exception as e: print(e)
 
 
-def _bovw_index(images):
-    if os.path.isfile(CLUSTER):
-        clusters = load(CLUSTER)
-    else:
-        return jsonify({"message": "Didn't findt local clusters"}, 500);
-
-    index_file = open(INDEX_BOVW, "a")
-    histogramBuilder = HistogramBuilder()
-    siftDescriptor = SiftDescriptor(200)
-
-    for key in images:
-        img = images[key]
-        img_name = img.filename
-        img_path = os.path.join(STATIC, img_name)
-        img.save(img_path)
-
-        # img_str = img.stream.read()
-        # img_np = np.frombuffer(img_str, np.uint8)
-        index_img_grayscale = cv2.imread(img_path, 0)
+def _bovw_index(img_paths, img_names):
+    try:
         
-        descriptors = siftDescriptor.describe(index_img_grayscale) 
-        index_histogram = histogramBuilder.compute_histogram(descriptors, clusters)
+        if os.path.isfile(CLUSTER):
+            clusters = load(CLUSTER)
+        else:
+            return jsonify({"message": "Didn't findt local clusters"}, 500);
 
-        #save file to static/images
-        
-        write_to_index(index_histogram, img_name, index_file)
+        index_file = open(INDEX_BOVW, "a")
+        histogramBuilder = HistogramBuilder()
+        siftDescriptor = SiftDescriptor(200)
 
-    index_file.close()
-    return
+        for i in range(len(img_paths)):
+            img_name = img_names[i]
+            img_path = img_paths[i]
+            index_img_grayscale = cv2.imread(img_path, 0)
+
+            descriptors = siftDescriptor.describe(index_img_grayscale) 
+            index_histogram = histogramBuilder.compute_histogram(descriptors, clusters)
+
+            #save file to static/images
+
+            write_to_index(index_histogram, img_name, index_file)
+
+        index_file.close()
+        return
+    except Exception as e: print(e)
         
 def _basic_index(img_paths, img_names):
     try:
@@ -389,16 +387,8 @@ def bovw_search(filestr):
         query_image = cv2.imdecode(npimg, -1)
         query_image_grayscale = cv2.cvtColor(query_image, cv2.COLOR_BGR2GRAY)
         descriptors = siftDescriptor.describe(query_image_grayscale)
-        query_histogram = np.zeros(1000)
         kmeans = load(CLUSTER)
-
-        print("making_histogram")
-        for i in range(len(descriptors)):
-            feature = descriptors[i]
-            feature = feature.reshape(1, 128)
-            index = kmeans.predict(feature)
-            query_histogram[index[0]] += 1
-        print("finished histogram")
+        query_histogram = histogramBuilder.compute_histogram(descriptors, kmeans)
 
     
 
@@ -407,7 +397,7 @@ def bovw_search(filestr):
         
 
 
-        results = searcher.search(query_histogram, 10)
+        (distance, image_idxs) = searcher.search(query_histogram, 10)
 
         # Loop over the results and displaying score and image name
         # for i in range(len(image_ids)):
@@ -622,6 +612,22 @@ def sum_vectors(vectors):
         _sum = np.add(_sum, vectors[i])
     return _sum
         
+def get_ids(image_idxs, index):
+
+    with open(index) as index_file:
+        reader = csv.reader(index_file)
+
+        ids = []
+
+        for row in reader:
+            ids.append(row[0])
+
+
+        image_ids = []
+        for image_idx in image_idxs[0]:
+            image_ids.append(ids[image_idx])
+
+        return image_ids
                 
 # Run!
 if __name__ == "__main__":
