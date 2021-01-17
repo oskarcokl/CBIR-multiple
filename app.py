@@ -405,9 +405,11 @@ def bovw_search(filestr):
         #         {"image": str(image_ids[i]), "score": str(distances[i])}
         #         )
 
-        for (score, result_id) in results:
+        img_ids = get_ids(image_idxs)
+        
+        for i in range(len(img_ids)):
             RESULTS_ARRAY.append(
-                {"image": str(result_id), "score": str(score)}
+                {"image": str(img_ids[i]), "score": str(distance[i])}
                 )
 
         #print(RESULTS_ARRAY[:10])
@@ -503,19 +505,14 @@ def bovw_search_query(query_features):
         
 
 
-        results = searcher.search(query_features, 10)
-
-        # Loop over the results and displaying score and image name
-        # for i in range(len(image_ids)):
-        #     RESULTS_ARRAY.append(
-        #         {"image": str(image_ids[i]), "score": str(distances[i])}
-        #         )
-
-
-        for (score, result_id) in results:
+        (distances, img_idxs) = searcher.search(query_features, 10)
+        img_ids = get_ids(img_idxs)
+        
+        for i in range(len(img_ids)):
             RESULTS_ARRAY.append(
-                {"image": str(result_id), "score": str(score)}
+                {"image": str(img_ids[i]), "score": str(distances[i])}
                 )
+
         
 
         return RESULTS_ARRAY[:10]
