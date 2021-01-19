@@ -160,7 +160,7 @@ def all_index():
                 print(Fore.GREEN + "Indexing for cnn algorithm")
                 _cnn_index(img_paths, img_names)
                 print(Fore.GREEN + "Done indexing for cnn algorithm")
-                #_bovw_index(images)
+                _bovw_index(img_paths, img_names)
 
                 print(Back.RESET + Fore.RESET)
                 return jsonify(message="Files indexed successfully.")
@@ -183,7 +183,7 @@ def _cnn_index(img_paths, img_names):
         index_file = open(INDEX_CNN, "a")
 
         for i in range(len(img_paths)):
-            img = image.loag_img(img_paths[i], target_size(244, 244))
+            img = image.load_img(img_paths[i], target_size=(244, 244))
             
             img_array = image.img_to_array(img)
             img_array = np.expand_dims(img_array, axis=0)
@@ -194,7 +194,7 @@ def _cnn_index(img_paths, img_names):
 
             #save file to static/images
 
-            write_to_index(features_numpy.flatten(), img_name, index_file)
+            write_to_index(features_numpy.flatten(), img_names[i], index_file)
 
         index_file.close()
         return
